@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-<meta name="theme-color" content="#0E1116" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#0E1116" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Hoops" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
@@ -21,6 +23,7 @@
     --blue:#3B82F6; --danger:#F2545B;
     --radius:18px; --radius-sm:12px;
     --safe-top:env(safe-area-inset-top); --safe-bottom:env(safe-area-inset-bottom);
+    color-scheme:light dark;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
@@ -251,6 +254,35 @@
 
   @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
   .pulse{animation:pop .28s ease}
+
+  /* ---------- Light mode (mirrors device setting) — high contrast for sunlight ---------- */
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#F3F5F8;          /* bright page so it stays legible in glare */
+      --surface:#FFFFFF;     /* white cards lift off the page */
+      --surface2:#E7ECF3;
+      --surface3:#D3DAE5;
+      --border:#BAC4D2;      /* firm borders so cards read in bright light */
+      --text:#0A0E14;        /* near-black for max contrast */
+      --muted:#46505E;       /* dark enough to read outdoors */
+      --muted2:#5E6876;
+      --faint:#8A94A3;
+      --accent:#E2541F;      /* deeper orange than the dark-mode tone */
+      --accent2:#A8530B;     /* dark amber — readable on white (gold isn't) */
+      --accentSoft:rgba(226,84,31,.12);
+      --success:#0E9C68;     /* darkened green for contrast on white */
+      --successSoft:rgba(14,156,104,.14);
+      --blue:#2563EB;
+      --danger:#DC2626;
+    }
+    /* Cards get a soft lift so they separate from the page in bright light */
+    .card,.stat,.act,.hero{box-shadow:0 1px 3px rgba(16,24,40,.07),0 1px 2px rgba(16,24,40,.04)}
+    .hero{background:linear-gradient(155deg,#FFF3EA,#FFFFFF 62%)}
+    .sess-head{background:rgba(243,245,248,.86)}
+    .nav{background:rgba(255,255,255,.92)}
+    /* keep checked/win states crisp: dark glyph on the bright accent fills */
+    .check.on,.wd.on .dot{color:#FFFFFF}
+  }
 </style>
 </head>
 <body>
@@ -794,7 +826,7 @@ function renderTimerOverlay(){
     <div class="ring-wrap">
       <div class="ring">
         <svg width="264" height="264" viewBox="0 0 264 264">
-          <circle cx="132" cy="132" r="120" fill="none" stroke="#232A34" stroke-width="16"/>
+          <circle cx="132" cy="132" r="120" fill="none" style="stroke:var(--surface3)" stroke-width="16"/>
           <circle id="ringProg" cx="132" cy="132" r="120" fill="none" stroke="url(#g)" stroke-width="16"
             stroke-linecap="round" stroke-dasharray="${2*Math.PI*120}" stroke-dashoffset="0"/>
           <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -927,7 +959,7 @@ function ringSVG(pct){
   const r=20,c=2*Math.PI*r,off=c*(1-pct/100);
   const col=pct===100?"#34D399":"#FFA600";
   return `<svg width="46" height="46" viewBox="0 0 46 46" style="transform:rotate(-90deg)">
-    <circle cx="23" cy="23" r="${r}" fill="none" stroke="#232A34" stroke-width="4"/>
+    <circle cx="23" cy="23" r="${r}" fill="none" style="stroke:var(--surface3)" stroke-width="4"/>
     <circle cx="23" cy="23" r="${r}" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"
       stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg>`;
 }
