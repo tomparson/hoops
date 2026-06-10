@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0E1116" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Hoops" />
+<title>Hoops · Training Tracker</title>
+<style>
+  :root{
+    --bg:#0E1116; --surface:#161B22; --surface2:#1F2630; --surface3:#2A323D;
+    --border:#2A323D; --text:#F5F7FA; --muted:#8A93A2; --faint:#5A6275;
+    --muted2:#6B7480;
+    --accent:#FF6B35; --accent2:#FFA600; --accentSoft:rgba(255,107,53,.14);
+    --success:#34D399; --successSoft:rgba(52,211,153,.14);
+    --blue:#3B82F6; --danger:#F2545B;
+    --radius:18px; --radius-sm:12px;
+    --safe-top:env(safe-area-inset-top); --safe-bottom:env(safe-area-inset-bottom);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+  body{max-width:560px;margin:0 auto;min-height:100vh;position:relative}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  h1,h2,h3,h4,p{margin:0}
+  .hidden{display:none!important}
+
+  /* ---------- App shell ---------- */
+  #app{padding:calc(var(--safe-top) + 8px) 16px calc(96px + var(--safe-bottom)) 16px;min-height:100vh}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 18px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+  .brand .ball{width:30px;height:30px;border-radius:50%;
+    background:radial-gradient(circle at 30% 28%,#FF8A4C,#E2541F);position:relative;flex:none;
+    box-shadow:0 2px 8px rgba(226,84,31,.5)}
+  .brand .ball:before,.brand .ball:after{content:"";position:absolute;background:#7a2d0f;opacity:.55}
+  .brand .ball:before{left:50%;top:0;width:1.5px;height:100%;transform:translateX(-50%)}
+  .brand .ball:after{top:50%;left:0;height:1.5px;width:100%;transform:translateY(-50%)}
+  .topbar .date{color:var(--muted);font-size:13px;font-weight:600}
+
+  /* ---------- Cards ---------- */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+  .card + .card{margin-top:14px}
+  .section-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:24px 4px 12px}
+  .section-label:first-child{margin-top:6px}
+
+  /* ---------- Home hero ---------- */
+  .hero{background:linear-gradient(155deg,#23170E,#161B22 60%);border:1px solid var(--border);
+    border-radius:var(--radius);padding:22px;position:relative;overflow:hidden}
+  .hero .glow{position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,107,53,.35),transparent 70%);filter:blur(4px)}
+  .hero h2{font-size:15px;color:var(--muted);font-weight:600;position:relative}
+  .hero .big{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:4px;position:relative}
+  .hero .sub{color:var(--muted);font-size:14px;margin-top:6px;position:relative}
+  .btn-primary{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+    background:linear-gradient(135deg,#FF7A3C,#F2541C);color:#fff;font-size:18px;font-weight:800;
+    padding:18px;border-radius:16px;margin-top:18px;position:relative;letter-spacing:-.01em;
+    box-shadow:0 8px 22px rgba(226,84,31,.35);transition:transform .08s ease}
+  .btn-primary:active{transform:scale(.975)}
+  .btn-ghost{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    background:var(--surface2);color:var(--text);font-size:16px;font-weight:700;padding:15px;border-radius:14px;
+    border:1px solid var(--border);transition:transform .08s}
+  .btn-ghost:active{transform:scale(.98)}
+
+  /* ---------- Stat grid ---------- */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px}
+  .stat .num{font-size:28px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:baseline;gap:5px}
+  .stat .num .unit{font-size:14px;color:var(--muted);font-weight:700}
+  .stat .lbl{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+  .stat .num.accent{color:var(--accent2)}
+  .stat .num.green{color:var(--success)}
+
+  /* ---------- Phase preview list (home) ---------- */
+  .phase-row{display:flex;align-items:center;gap:14px;padding:14px 4px}
+  .phase-row + .phase-row{border-top:1px solid var(--border)}
+  .phase-ico{width:42px;height:42px;border-radius:12px;background:var(--surface2);display:flex;
+    align-items:center;justify-content:center;font-size:21px;flex:none}
+  .phase-row .meta{flex:1;min-width:0}
+  .phase-row .meta .nm{font-weight:700;font-size:16px}
+  .phase-row .meta .ds{color:var(--muted);font-size:13px;margin-top:2px}
+  .phase-row .dur{color:var(--muted);font-size:13px;font-weight:700;flex:none}
+
+  /* ---------- Session ---------- */
+  .sess-head{position:sticky;top:0;z-index:40;background:rgba(14,17,22,.86);backdrop-filter:blur(12px);
+    margin:0 -16px;padding:calc(var(--safe-top) + 10px) 16px 12px;border-bottom:1px solid var(--border)}
+  .sess-head .row1{display:flex;align-items:center;justify-content:space-between}
+  .sess-head .ttl{font-weight:800;font-size:18px;letter-spacing:-.02em}
+  .sess-head .timer{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:14px}
+  .xbtn{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--muted)}
+  .progress-wrap{margin-top:12px}
+  .progress-bar{height:8px;background:var(--surface3);border-radius:99px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#FF7A3C,#FFA600);border-radius:99px;width:0;transition:width .35s cubic-bezier(.2,.8,.2,1)}
+  .progress-meta{display:flex;justify-content:space-between;margin-top:7px;font-size:12px;color:var(--muted);font-weight:600}
+
+  .phase-block{margin-top:22px}
+  .phase-title{display:flex;align-items:center;gap:10px;margin:0 2px 12px}
+  .phase-title .em{font-size:20px}
+  .phase-title .tx{font-weight:800;font-size:17px;letter-spacing:-.01em}
+  .phase-title .cnt{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700;
+    background:var(--surface2);padding:3px 9px;border-radius:99px}
+
+  .act{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;transition:border-color .2s,background .2s}
+  .act.done{border-color:rgba(52,211,153,.4);background:linear-gradient(180deg,rgba(52,211,153,.06),transparent)}
+  .act-top{display:flex;align-items:flex-start;gap:13px}
+  .act-info{flex:1;min-width:0}
+  .act-name{font-weight:700;font-size:16.5px;letter-spacing:-.01em;line-height:1.25}
+  .act-note{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.4}
+  .act-tag{display:inline-block;font-size:11px;font-weight:700;color:var(--accent2);background:var(--accentSoft);
+    padding:2px 8px;border-radius:99px;margin-top:8px;letter-spacing:.02em}
+  .check{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--surface3);flex:none;display:flex;
+    align-items:center;justify-content:center;transition:all .18s;font-size:18px;color:transparent}
+  .check.on{background:var(--success);border-color:var(--success);color:#0E1116}
+  .check:active{transform:scale(.9)}
+  .act-btns{display:flex;align-items:center;gap:10px;flex:none}
+  .ibtn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--surface3);background:var(--surface);
+    color:var(--muted);font-size:15px;font-weight:700;font-style:italic;font-family:Georgia,"Times New Roman",serif;
+    display:flex;align-items:center;justify-content:center;transition:transform .12s,background .15s,color .15s;flex:none}
+  .ibtn:active{transform:scale(.88);background:var(--surface2);color:var(--text)}
+
+  /* counter control */
+  .counter{display:flex;align-items:center;gap:12px;margin-top:16px}
+  .cbtn{width:60px;height:60px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);
+    font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text);
+    transition:transform .06s,background .15s;flex:none}
+  .cbtn:active{transform:scale(.92)}
+  .cbtn.plus{background:linear-gradient(135deg,#FF7A3C,#F2541C);border-color:transparent;color:#fff;
+    box-shadow:0 6px 16px rgba(226,84,31,.32)}
+  .cbtn.big{flex:1}
+  .cval{flex:1;text-align:center}
+  .cval .v{font-size:34px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .cval .v .tgt{font-size:17px;color:var(--muted);font-weight:700}
+  .cval .lab{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+
+  /* spots */
+  .spots{display:flex;gap:8px;margin-top:16px}
+  .spot{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 4px;
+    text-align:center;transition:all .15s}
+  .spot.full{background:var(--successSoft);border-color:rgba(52,211,153,.4)}
+  .spot .sn{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .spot .sv{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .spot .sv .st{font-size:12px;color:var(--muted)}
+  .spot:active{transform:scale(.94)}
+
+  /* timer activity start */
+  .timer-start{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:16px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:15px;font-weight:700;font-size:16px}
+  .timer-start.done{background:var(--successSoft);border-color:rgba(52,211,153,.35);color:var(--success)}
+  .timer-start:active{transform:scale(.98)}
+  .ft-row{display:flex;gap:10px;margin-top:16px}
+  .ft-stat{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+  .ft-stat .fv{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .ft-stat .fl{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+  .ft-stat.pct .fv{color:var(--accent2)}
+  .ft-ctrls{display:flex;gap:10px;margin-top:10px}
+
+  .finish-bar{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;
+    padding:12px 16px calc(12px + var(--safe-bottom));background:linear-gradient(0deg,var(--bg) 70%,transparent);
+    z-index:50}
+
+  /* ---------- Timer overlay ---------- */
+  .overlay{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;
+    padding:calc(var(--safe-top) + 16px) 20px calc(24px + var(--safe-bottom));max-width:560px;margin:0 auto}
+  .ov-head{display:flex;align-items:center;justify-content:space-between}
+  .ov-head .nm{font-weight:700;font-size:16px;color:var(--muted)}
+  .ring-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+  .ring{position:relative;width:264px;height:264px}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .phase{font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+  .ring .phase.work{color:var(--accent)}
+  .ring .phase.rest{color:var(--blue)}
+  .ring .tnum{font-size:74px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1}
+  .ring .sets{font-size:14px;color:var(--muted);font-weight:700;margin-top:10px}
+  .ov-ctrls{display:flex;gap:12px;margin-top:10px}
+  .ov-ctrls button{flex:1;padding:18px;border-radius:16px;font-weight:800;font-size:16px;background:var(--surface2);border:1px solid var(--border)}
+  .ov-ctrls .main{background:linear-gradient(135deg,#FF7A3C,#F2541C);color:#fff;border-color:transparent;flex:2}
+
+  /* ---------- History ---------- */
+  .chart{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:8px}
+  .chart .bar{flex:1;background:linear-gradient(180deg,#FF7A3C,#F2541C);border-radius:6px 6px 3px 3px;min-height:4px;position:relative;opacity:.9}
+  .chart .bar:last-child{opacity:1;box-shadow:0 0 0 2px rgba(255,166,0,.4)}
+  .chart-x{display:flex;gap:6px;margin-top:6px}
+  .chart-x span{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:600}
+  .hist-item{display:flex;align-items:center;gap:14px;padding:15px 0}
+  .hist-item + .hist-item{border-top:1px solid var(--border)}
+  .hist-ring{width:46px;height:46px;flex:none;position:relative}
+  .hist-ring .pc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+  .hist-meta{flex:1;min-width:0}
+  .hist-meta .d{font-weight:700;font-size:15px}
+  .hist-meta .s{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .hist-chevron{color:var(--faint);font-size:20px}
+  .empty{text-align:center;color:var(--muted);padding:50px 20px}
+  .empty .em{font-size:46px;margin-bottom:14px}
+  .empty p{font-size:15px;line-height:1.5}
+
+  .week-dots{display:flex;justify-content:space-between;margin-top:14px}
+  .wd{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1}
+  .wd .dot{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:13px}
+  .wd.on .dot{background:var(--success);border-color:var(--success);color:#0E1116}
+  .wd.today .dot{box-shadow:0 0 0 2px var(--accent)}
+  .wd .lab{font-size:11px;color:var(--muted);font-weight:700}
+
+  /* ---------- Bottom nav ---------- */
+  .nav{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;z-index:60;
+    background:rgba(18,22,28,.94);backdrop-filter:blur(14px);border-top:1px solid var(--border);
+    display:flex;padding:8px 8px calc(8px + var(--safe-bottom))}
+  .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;color:var(--muted);font-size:11px;font-weight:700}
+  .nav button.on{color:var(--accent)}
+  .nav .ico{font-size:22px;line-height:1}
+
+  /* ---------- Modal ---------- */
+  .modal-bg{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+  .modal{background:var(--surface);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:24px 20px calc(24px + var(--safe-bottom));
+    border-top:1px solid var(--border)}
+  .modal h3{font-size:19px;font-weight:800;margin-bottom:8px}
+  .modal p{color:var(--muted);font-size:14.5px;line-height:1.5;margin-bottom:20px}
+  .modal .acts{display:flex;flex-direction:column;gap:10px}
+  .modal .danger{background:var(--danger);color:#fff;border-radius:14px;padding:16px;font-weight:800;font-size:16px;text-align:center}
+  .modal .neutral{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;font-weight:700;font-size:16px;text-align:center}
+
+  /* ---------- Info bottom sheet ---------- */
+  .sheet-bg{position:fixed;inset:0;z-index:130;background:rgba(0,0,0,0);display:flex;align-items:flex-end;justify-content:center;transition:background .25s}
+  .sheet-bg.show{background:rgba(0,0,0,.62)}
+  .sheet{background:var(--surface);width:100%;max-width:560px;border-radius:24px 24px 0 0;
+    padding:8px 22px calc(24px + var(--safe-bottom));border-top:1px solid var(--border);
+    transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.85,.25,1);touch-action:none;will-change:transform}
+  .sheet-bg.show .sheet{transform:translateY(0)}
+  .sheet-grab{width:42px;height:5px;border-radius:99px;background:var(--surface3);margin:8px auto 18px}
+  .sheet-emoji{width:54px;height:54px;border-radius:16px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px}
+  .sheet h3{font-size:21px;font-weight:800;text-align:center;letter-spacing:-.02em;margin-bottom:4px}
+  .sheet-sub{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);text-align:center;margin-bottom:14px}
+  .sheet ul{list-style:none;padding:0;margin:0 0 18px}
+  .sheet li{position:relative;padding:11px 0 11px 26px;font-size:15.5px;line-height:1.45;border-top:1px solid var(--border)}
+  .sheet li:first-child{border-top:none}
+  .sheet li:before{content:"";position:absolute;left:4px;top:19px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .sheet-close{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:15px;font-weight:800;font-size:16px;color:var(--text)}
+  .sheet-close:active{transform:scale(.98)}
+
+  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);
+    background:var(--surface3);color:var(--text);padding:12px 20px;border-radius:99px;font-weight:700;font-size:14px;
+    z-index:200;opacity:0;transition:all .3s;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+  .pulse{animation:pop .28s ease}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="nav" id="nav"></nav>
+<div id="overlayRoot"></div>
+<div id="modalRoot"></div>
+<div id="infoRoot"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   ROUTINE DEFINITION
+   ===================================================================== */
+const ROUTINE = [
+  { id:"warmup", name:"Warm-up", emoji:"🤸", dur:"5 min", acts:[
+    { id:"jog",     type:"check",  name:"Jog the park perimeter" },
+    { id:"stretch", type:"check",  name:"Dynamic stretches", note:"Leg swings, lunges, ankle circles" },
+  ]},
+  { id:"agility", name:"Agility", emoji:"⚡", dur:"15 min", acts:[
+    { id:"slides",     type:"timer", name:"Defensive slides", note:"Baseline to sideline, low stance",
+      sets:4, work:30, rest:30 },
+    { id:"sprintback", type:"timer", name:"Sprint–backpedal", note:"Between the lines, explode and recover",
+      sets:4, work:30, rest:30 },
+    { id:"closeouts",  type:"counter", name:"Closeout reps", target:6,
+      note:"Sprint under basket → 3pt line, chop feet low, slide two steps. Rest 30s.", unit:"reps" },
+  ]},
+  { id:"dribbling", name:"Dribbling", emoji:"🏀", dur:"15 min", acts:[
+    { id:"pound",  type:"timer", name:"Pound dribbles", note:"Each hand, hard as you can — eyes up",
+      sets:2, work:45, rest:15, setLabel:["Right hand","Left hand"] },
+    { id:"moves",  type:"timer", name:"Crossover / between-legs / behind-back", note:"At a cone or water bottle",
+      sets:1, work:180, rest:0 },
+    { id:"speed",  type:"counter", name:"Speed dribbles — weak hand", target:6,
+      note:"Full-court length, weak hand only", unit:"lengths" },
+  ]},
+  { id:"shooting", name:"Shooting", emoji:"🎯", dur:"20 min", acts:[
+    { id:"form",  type:"counter", name:"Form shots", target:20, makes:true,
+      note:"1m from basket · one hand · perfect arc", unit:"makes" },
+    { id:"spots", type:"spots",   name:"Spot shooting", makes:true,
+      note:"5 spots around the key · 5 makes each", spotCount:5, perSpot:5 },
+    { id:"game",  type:"counter", name:"Game-speed reps", target:15, makes:true,
+      note:"Self-pass off backboard, catch, shoot", unit:"makes" },
+  ]},
+  { id:"cooldown", name:"Cool down", emoji:"🧊", dur:"5 min", acts:[
+    { id:"freethrows", type:"ft", name:"Free throws", note:"Catch your breath between shots" },
+  ]},
+];
+
+const ALL_ACTS = ROUTINE.flatMap(p => p.acts.map(a => ({...a, phase:p.id})));
+const TOTAL_ACTS = ALL_ACTS.length;
+
+/* ELI5 "how to do it" bullets — shown in the info sheet. Warm-up drills have none. */
+const INFO = {
+  slides: ["Bend your knees and get low, like sitting on an invisible chair","Spread your feet wide and stay on the balls of your feet","Push off one foot to slide sideways — never cross your feet over","Keep your chest up and hands out wide","Slide one way, then back the other way"],
+  sprintback: ["Sprint forward as fast as you can to a line","At the line, stop and run backwards (backpedal) to the start","Stay low going backwards so you don't fall","Pump your arms in both directions","It's about quick, explosive changes of direction"],
+  closeouts: ["Start standing under the basket","Sprint out towards the 3-point line","As you get close, take quick little choppy steps to slow down","Drop into a low stance with your hands up, like guarding a shooter","Slide sideways two steps, then jog back and go again"],
+  pound: ["Bounce the ball hard into the floor, over and over","Use just one hand at a time","Keep your head up and eyes forward — don't look at the ball","Pound it about waist height, as hard as you can","Switch to your other hand when it's time"],
+  moves: ["Put a cone or water bottle on the ground","Dribble up to it, then do a move to switch the ball to your other hand","Crossover: bounce it quickly across your body to the other hand","Between-legs: bounce it under one leg to the other hand","Behind-back: wrap it around your back to the other hand","Stay low and keep your eyes up the whole time"],
+  speed: ["Use your weaker hand only — the one that feels awkward","Push the ball out in front and run with it the full court","Dribble a little higher and further ahead so you can move fast","Keep your eyes up, not on the ball","One full court length counts as one rep"],
+  form: ["Stand really close — about one big step from the hoop","Shoot with one hand only (your other hand just rests on the side)","Bend your knees and push the ball up softly","Aim for a high arc so it rainbows down into the net","Flick your wrist so your fingers point down at the end","Only count it when it goes in"],
+  spots: ["Pick 5 spots in a half-circle around the free-throw area","Stand at the first spot and shoot until you make 5","Then move to the next spot and do the same","Use proper form on every shot","Tap a spot box once for each make"],
+  game: ["Throw the ball off the backboard to yourself","Chase it and catch it like grabbing a rebound","Shoot straight away at game speed — quick, not slow","Move to a new spot and repeat","Count every make"],
+  freethrows: ["Stand at the free-throw line, feet about shoulder-width apart","Do the same routine every time (e.g. two bounces, deep breath)","Bend your knees and keep your eyes on the rim","Push up smoothly and flick your wrist","Tap 'Made' or 'Miss' after each shot to track your accuracy"],
+};
+
+/* =====================================================================
+   STORAGE
+   ===================================================================== */
+const LS_SESSIONS = "bb_sessions_v1";
+const LS_CURRENT  = "bb_current_v1";
+
+function loadSessions(){ try{ return JSON.parse(localStorage.getItem(LS_SESSIONS)) || []; }catch(e){ return []; } }
+function saveSessions(s){ localStorage.setItem(LS_SESSIONS, JSON.stringify(s)); }
+function loadCurrent(){ try{ return JSON.parse(localStorage.getItem(LS_CURRENT)) || null; }catch(e){ return null; } }
+function saveCurrent(c){ if(c) localStorage.setItem(LS_CURRENT, JSON.stringify(c)); else localStorage.removeItem(LS_CURRENT); }
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+let view = "home";           // home | session | history
+let current = loadCurrent(); // active session or null
+let activeTimer = null;      // timer overlay state
+
+/* =====================================================================
+   SESSION MODEL
+   blank progress per activity
+   ===================================================================== */
+function blankProgress(){
+  const p = {};
+  for(const a of ALL_ACTS){
+    if(a.type==="check")   p[a.id] = { done:false };
+    if(a.type==="counter") p[a.id] = { done:false, value:0 };
+    if(a.type==="timer")   p[a.id] = { done:false, setsDone:0 };
+    if(a.type==="spots")   p[a.id] = { done:false, spots:Array(a.spotCount).fill(0) };
+    if(a.type==="ft")      p[a.id] = { done:false, made:0, att:0 };
+  }
+  return p;
+}
+function newSession(){
+  return { startedAt: Date.now(), date: todayKey(), progress: blankProgress() };
+}
+
+/* activity completion helpers */
+function isActDone(a, pr){
+  const d = pr[a.id];
+  if(!d) return false;
+  if(a.type==="check")   return d.done;
+  if(a.type==="counter") return d.done || d.value >= a.target;
+  if(a.type==="timer")   return d.done || d.setsDone >= a.sets;
+  if(a.type==="spots")   return d.done || d.spots.every(v=>v>=a.perSpot);
+  if(a.type==="ft")      return d.done;
+  return false;
+}
+function doneCount(pr){ return ALL_ACTS.filter(a=>isActDone(a,pr)).length; }
+function sessionMakes(pr){
+  let m=0;
+  for(const a of ALL_ACTS){
+    if(!a.makes) continue;
+    if(a.type==="counter") m += pr[a.id].value;
+    if(a.type==="spots")   m += pr[a.id].spots.reduce((x,y)=>x+y,0);
+  }
+  return m;
+}
+
+/* =====================================================================
+   DATE HELPERS
+   ===================================================================== */
+function todayKey(d=new Date()){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); }
+function fmtFullDate(ts){ return new Date(ts).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}); }
+function fmtDur(ms){ const m=Math.floor(ms/60000); return m<60? m+" min" : Math.floor(m/60)+"h "+(m%60)+"m"; }
+function fmtClock(s){ const m=Math.floor(s/60),x=s%60; return m+":"+String(x).padStart(2,"0"); }
+
+/* monday (week start) key for a given date */
+function weekKey(d){ const x=new Date(d); x.setHours(0,0,0,0); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); return todayKey(x); }
+/* streak = consecutive weeks (ending this week or last) with >=1 session */
+function computeStreak(sessions){
+  if(!sessions.length) return 0;
+  const weeks = new Set(sessions.map(s=>weekKey(new Date(s.startedAt))));
+  let streak=0; let d=new Date();
+  // allow the streak to count from this week or last week (one week of grace)
+  if(!weeks.has(weekKey(d))){ d.setDate(d.getDate()-7); if(!weeks.has(weekKey(d))) return 0; }
+  while(weeks.has(weekKey(d))){ streak++; d.setDate(d.getDate()-7); }
+  return streak;
+}
+function weekHasSession(sessions){ return sessions.some(s=>weekKey(new Date(s.startedAt))===weekKey(new Date())); }
+function sessionsThisWeek(sessions){
+  const now=new Date(); const day=(now.getDay()+6)%7; // monday=0
+  const monday=new Date(now); monday.setHours(0,0,0,0); monday.setDate(now.getDate()-day);
+  return sessions.filter(s=> new Date(s.startedAt) >= monday).length;
+}
+
+/* =====================================================================
+   AUDIO CUES (Web Audio)
+   ===================================================================== */
+let audioCtx=null;
+function ensureAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(audioCtx&&audioCtx.state==="suspended") audioCtx.resume(); }
+function beep(freq=880, dur=0.15, type="sine", vol=0.25){
+  if(!audioCtx) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+  const t=audioCtx.currentTime;
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.start(t); o.stop(t+dur+0.02);
+}
+function cueWork(){ beep(660,0.12,"sine"); setTimeout(()=>beep(990,0.18,"sine"),130); }
+function cueRest(){ beep(440,0.22,"triangle"); }
+function cueDone(){ beep(784,0.12); setTimeout(()=>beep(988,0.12),130); setTimeout(()=>beep(1318,0.25),260); }
+function cueTick(){ beep(1100,0.05,"square",0.12); }
+function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
+
+/* =====================================================================
+   RENDER ROOT
+   ===================================================================== */
+const app = document.getElementById("app");
+function render(){
+  if(view==="session" && current) renderSession();
+  else if(view==="history") renderHistory();
+  else renderHome();
+  renderNav();
+}
+
+/* =====================================================================
+   HOME
+   ===================================================================== */
+function renderHome(){
+  const sessions = loadSessions();
+  const streak = computeStreak(sessions);
+  const total = sessions.length;
+  const last = sessions[sessions.length-1];
+  const hasActive = !!current;
+  const activeDone = hasActive ? doneCount(current.progress) : 0;
+
+  let html = `
+  <div class="topbar">
+    <div class="brand"><span class="ball"></span>Hoops</div>
+    <div class="date">${new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"short"})}</div>
+  </div>`;
+
+  // Hero
+  html += `<div class="hero"><div class="glow"></div>`;
+  if(hasActive){
+    html += `
+      <h2>Session in progress</h2>
+      <div class="big">${activeDone}<span style="font-size:20px;color:var(--muted)"> / ${TOTAL_ACTS} drills</span></div>
+      <div class="sub">Picked up where you left off</div>
+      <button class="btn-primary" onclick="resumeSession()">▶︎ Resume session</button>`;
+  } else {
+    const trained = weekHasSession(sessions);
+    const greet = streak>0 ? `${streak}-week streak 🔥 — keep it rolling` : "Ready to put in the work?";
+    html += `
+      <h2>${trained?"Nice — trained this week ✅":"This week's session"}</h2>
+      <div class="big">1 Hour · Full Workout</div>
+      <div class="sub">${greet}</div>
+      <button class="btn-primary" onclick="startSession()">${trained?"＋ Start another session":"▶︎ Start training"}</button>`;
+  }
+  html += `</div>`;
+
+  // Stats — wide weekly-streak banner, then two supporting stats
+  html += `
+  <div class="stat" style="margin-top:14px">
+    <div class="num accent">${streak}<span class="unit">week${streak===1?"":"s"}</span></div>
+    <div class="lbl">Weekly streak — train once a week to keep it alive 🔥</div>
+  </div>
+  <div class="stat-grid" style="margin-top:12px">
+    <div class="stat"><div class="num green">${total}</div><div class="lbl">Total sessions</div></div>
+    <div class="stat"><div class="num">${last?sessionMakes(last.progress):0}<span class="unit">makes</span></div><div class="lbl">Last session makes</div></div>
+  </div>`;
+
+  // Week dots
+  html += `<div class="section-label">This week</div><div class="card">${weekDotsHTML(sessions)}</div>`;
+
+  // Routine preview
+  html += `<div class="section-label">Today's routine</div><div class="card" style="padding:6px 16px">`;
+  for(const p of ROUTINE){
+    html += `
+      <div class="phase-row">
+        <div class="phase-ico">${p.emoji}</div>
+        <div class="meta"><div class="nm">${p.name}</div><div class="ds">${p.acts.length} drill${p.acts.length>1?"s":""}</div></div>
+        <div class="dur">${p.dur}</div>
+      </div>`;
+  }
+  html += `</div>`;
+
+  app.innerHTML = html;
+}
+
+function todayHasSession(sessions){ return sessions.some(s=>s.date===todayKey()); }
+function todayHasSession(sessions){ return sessions.some(s=>s.date===todayKey()); }
+
+function weekDotsHTML(sessions){
+  const labels=["M","T","W","T","F","S","S"];
+  const now=new Date(); const day=(now.getDay()+6)%7;
+  const monday=new Date(now); monday.setHours(0,0,0,0); monday.setDate(now.getDate()-day);
+  const trained=new Set(sessions.map(s=>s.date));
+  let h=`<div class="week-dots">`;
+  for(let i=0;i<7;i++){
+    const d=new Date(monday); d.setDate(monday.getDate()+i);
+    const key=todayKey(d); const on=trained.has(key); const isToday=key===todayKey();
+    h+=`<div class="wd ${on?"on":""} ${isToday?"today":""}"><div class="dot">${on?"✓":""}</div><div class="lab">${labels[i]}</div></div>`;
+  }
+  return h+`</div>`;
+}
+
+/* =====================================================================
+   SESSION FLOW CONTROLS
+   ===================================================================== */
+function startSession(){
+  ensureAudio();
+  current = newSession();
+  saveCurrent(current);
+  view="session"; render();
+  window.scrollTo(0,0);
+}
+function resumeSession(){ ensureAudio(); view="session"; render(); window.scrollTo(0,0); }
+
+function exitSession(){ view="home"; render(); window.scrollTo(0,0); }
+
+function finishSession(){
+  const done = doneCount(current.progress);
+  showModal({
+    title: done<TOTAL_ACTS ? "Finish session?" : "Great work! 🏀",
+    body: `You completed ${done} of ${TOTAL_ACTS} drills${sessionMakes(current.progress)?` · ${sessionMakes(current.progress)} makes`:""}. Save this session to your history?`,
+    actions: [
+      { label:"Save session", cls:"danger", style:"background:linear-gradient(135deg,#FF7A3C,#F2541C)", fn:()=>{
+          const sessions=loadSessions();
+          const rec={...current, endedAt:Date.now(), completed:done, total:TOTAL_ACTS, makes:sessionMakes(current.progress)};
+          sessions.push(rec); saveSessions(sessions);
+          current=null; saveCurrent(null);
+          cueDone(); vibrate([40,60,40]);
+          closeModal(); view="history"; render(); window.scrollTo(0,0);
+          toast("Session saved 💪");
+        }},
+      { label:"Keep training", cls:"neutral", fn:closeModal },
+    ]
+  });
+}
+function discardSession(){
+  showModal({
+    title:"Discard session?",
+    body:"This will clear your current progress without saving it. This can't be undone.",
+    actions:[
+      { label:"Discard", cls:"danger", fn:()=>{ current=null; saveCurrent(null); closeModal(); exitSession(); toast("Session discarded"); }},
+      { label:"Cancel", cls:"neutral", fn:closeModal },
+    ]
+  });
+}
+
+/* =====================================================================
+   SESSION RENDER
+   ===================================================================== */
+let sessionTimerInt=null;
+function renderSession(){
+  const pr=current.progress;
+  const done=doneCount(pr);
+  const pct=Math.round(done/TOTAL_ACTS*100);
+
+  let html=`
+  <div class="sess-head">
+    <div class="row1">
+      <div class="ttl">Training Session</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="timer" id="sessClock">0:00</span>
+        <button class="xbtn" onclick="discardSession()">✕</button>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-meta"><span>${done} / ${TOTAL_ACTS} drills done</span><span>${pct}%${sessionMakes(pr)?` · ${sessionMakes(pr)} makes`:""}</span></div>
+    </div>
+  </div>`;
+
+  for(const p of ROUTINE){
+    const pDone=p.acts.filter(a=>isActDone(a,pr)).length;
+    html+=`<div class="phase-block">
+      <div class="phase-title"><span class="em">${p.emoji}</span><span class="tx">${p.name}</span>
+        <span class="cnt">${pDone}/${p.acts.length} · ${p.dur}</span></div>`;
+    for(const a of p.acts){ html+=renderActivity(a,pr); }
+    html+=`</div>`;
+  }
+
+  html+=`<div style="height:20px"></div>`;
+  app.innerHTML=html;
+
+  // finish bar
+  let fb=document.getElementById("finishBar");
+  if(!fb){ fb=document.createElement("div"); fb.className="finish-bar"; fb.id="finishBar"; document.body.appendChild(fb); }
+  fb.innerHTML=`<button class="btn-primary" style="margin-top:0" onclick="finishSession()">${done===TOTAL_ACTS?"🏁 Finish & save":"Finish session"}</button>`;
+  fb.classList.remove("hidden");
+
+  startSessionClock();
+}
+function removeFinishBar(){ const fb=document.getElementById("finishBar"); if(fb) fb.remove(); }
+
+function startSessionClock(){
+  if(sessionTimerInt) clearInterval(sessionTimerInt);
+  const el=()=>document.getElementById("sessClock");
+  const upd=()=>{ const e=el(); if(!e||!current){ clearInterval(sessionTimerInt); return; } const s=Math.floor((Date.now()-current.startedAt)/1000); e.textContent=fmtClock(s); };
+  upd(); sessionTimerInt=setInterval(upd,1000);
+}
+
+function renderActivity(a,pr){
+  const d=pr[a.id]; const done=isActDone(a,pr);
+  let inner=`
+    <div class="act ${done?"done":""}" id="act-${a.id}">
+      <div class="act-top">
+        <div class="act-info">
+          <div class="act-name">${a.name}</div>
+          ${a.note?`<div class="act-note">${a.note}</div>`:""}
+          ${tagFor(a)}
+        </div>
+        <div class="act-btns">
+          ${INFO[a.id]?`<button class="ibtn" onclick="showInfo('${a.id}')" aria-label="How to do it">i</button>`:""}
+          <button class="check ${done?"on":""}" onclick="toggleCheck('${a.id}')">✓</button>
+        </div>
+      </div>`;
+
+  if(a.type==="counter"){
+    inner+=`
+      <div class="counter">
+        <button class="cbtn" onclick="counter('${a.id}',-1)">−</button>
+        <div class="cval"><div class="v">${d.value}<span class="tgt"> / ${a.target}</span></div><div class="lab">${a.unit}</div></div>
+        <button class="cbtn plus big" onclick="counter('${a.id}',1)">+</button>
+      </div>`;
+  }
+  else if(a.type==="spots"){
+    inner+=`<div class="spots">`;
+    for(let i=0;i<a.spotCount;i++){
+      const v=d.spots[i]; const full=v>=a.perSpot;
+      inner+=`<button class="spot ${full?"full":""}" onclick="spotTap('${a.id}',${i})">
+        <div class="sn">Spot ${i+1}</div><div class="sv">${v}<span class="st">/${a.perSpot}</span></div></button>`;
+    }
+    inner+=`</div>`;
+  }
+  else if(a.type==="timer"){
+    const label = d.setsDone>=a.sets ? "All sets done" : `Start timer · ${a.sets}×${a.work}s`;
+    inner+=`<button class="timer-start ${d.setsDone>=a.sets?"done":""}" onclick="openTimer('${a.id}')">
+      ${d.setsDone>=a.sets?"✓ "+label : "⏱ "+label}${d.setsDone>0&&d.setsDone<a.sets?` · ${d.setsDone}/${a.sets} done`:""}</button>`;
+  }
+  else if(a.type==="ft"){
+    const pct = d.att? Math.round(d.made/d.att*100):0;
+    inner+=`
+      <div class="ft-row">
+        <div class="ft-stat"><div class="fv">${d.made}</div><div class="fl">MADE</div></div>
+        <div class="ft-stat"><div class="fv">${d.att}</div><div class="fl">ATTEMPTS</div></div>
+        <div class="ft-stat pct"><div class="fv">${pct}%</div><div class="fl">ACCURACY</div></div>
+      </div>
+      <div class="ft-ctrls">
+        <button class="btn-ghost" onclick="ftTap('${a.id}',true)">＋ Made</button>
+        <button class="btn-ghost" onclick="ftTap('${a.id}',false)">＋ Miss</button>
+      </div>`;
+  }
+  inner+=`</div>`;
+  return inner;
+}
+function tagFor(a){
+  if(a.type==="timer") return `<span class="act-tag">⏱ ${a.sets} × ${a.work}s${a.rest?` · ${a.rest}s rest`:""}</span>`;
+  if(a.type==="counter") return `<span class="act-tag">🎯 ${a.target} ${a.unit}</span>`;
+  if(a.type==="spots") return `<span class="act-tag">🎯 ${a.spotCount} spots × ${a.perSpot}</span>`;
+  if(a.type==="ft") return `<span class="act-tag">🏀 log makes & misses</span>`;
+  return "";
+}
+
+/* refresh a single activity card + header without full re-render (keeps scroll) */
+function refreshActivity(id){
+  const a=ALL_ACTS.find(x=>x.id===id); const pr=current.progress;
+  const el=document.getElementById("act-"+id);
+  if(el){ const tmp=document.createElement("div"); tmp.innerHTML=renderActivity(a,pr); el.replaceWith(tmp.firstElementChild); }
+  refreshProgress();
+  saveCurrent(current);
+}
+function refreshProgress(){
+  const pr=current.progress; const done=doneCount(pr); const pct=Math.round(done/TOTAL_ACTS*100);
+  const fill=document.querySelector(".progress-fill"); if(fill) fill.style.width=pct+"%";
+  const meta=document.querySelector(".progress-meta");
+  if(meta) meta.innerHTML=`<span>${done} / ${TOTAL_ACTS} drills done</span><span>${pct}%${sessionMakes(pr)?` · ${sessionMakes(pr)} makes`:""}</span>`;
+  // phase counters
+  document.querySelectorAll(".phase-block").forEach((blk,idx)=>{
+    const p=ROUTINE[idx]; const pDone=p.acts.filter(a=>isActDone(a,pr)).length;
+    const cnt=blk.querySelector(".cnt"); if(cnt) cnt.textContent=`${pDone}/${p.acts.length} · ${p.dur}`;
+  });
+}
+
+/* interactions */
+function toggleCheck(id){
+  const a=ALL_ACTS.find(x=>x.id===id); const d=current.progress[id];
+  const wasDone=isActDone(a,current.progress);
+  if(a.type==="check"){ d.done=!d.done; }
+  else { d.done=!wasDone; } // manual override
+  if(isActDone(a,current.progress)){ cueTick(); vibrate(15); }
+  refreshActivity(id);
+}
+function counter(id,delta){
+  const a=ALL_ACTS.find(x=>x.id===id); const d=current.progress[id];
+  d.value=Math.max(0,d.value+delta);
+  if(delta>0){ cueTick(); vibrate(10); if(d.value===a.target){ d.done=true; cueDone(); vibrate([30,40,30]); } }
+  if(d.value<a.target) d.done=false;
+  refreshActivity(id);
+  bump("act-"+id+" .cval .v");
+}
+function spotTap(id,i){
+  const a=ALL_ACTS.find(x=>x.id===id); const d=current.progress[id];
+  d.spots[i]=d.spots[i]>=a.perSpot?0:d.spots[i]+1; // tap fills, tap again when full resets
+  cueTick(); vibrate(10);
+  if(d.spots.every(v=>v>=a.perSpot)){ d.done=true; cueDone(); vibrate([30,40,30]); }
+  else d.done=false;
+  refreshActivity(id);
+}
+function ftTap(id,made){
+  const d=current.progress[id];
+  d.att++; if(made) d.made++;
+  d.done=true; // any logged FT counts as done (cool-down)
+  cueTick(); vibrate(10);
+  refreshActivity(id);
+}
+function bump(sel){ const e=document.querySelector("#"+sel.replace(" ",">*")); }
+
+/* =====================================================================
+   TIMER OVERLAY
+   ===================================================================== */
+function openTimer(id){
+  ensureAudio();
+  const a=ALL_ACTS.find(x=>x.id===id);
+  const d=current.progress[id];
+  activeTimer={
+    actId:id, a, set: d.setsDone, // resume at next set if partial
+    phase:"work", remaining:a.work, running:true, raf:null, lastTs:null
+  };
+  if(activeTimer.set>=a.sets) activeTimer.set=0; // restart if already complete
+  renderTimerOverlay();
+  cueWork(); vibrate(30);
+  runTimer();
+}
+function runTimer(){
+  if(timerInt) clearInterval(timerInt);
+  timerInt=setInterval(()=>{
+    if(!activeTimer||!activeTimer.running) return;
+    activeTimer.remaining--;
+    if(activeTimer.remaining<=3 && activeTimer.remaining>0) cueTick();
+    if(activeTimer.remaining<=0){ timerAdvance(); }
+    updateTimerOverlay();
+  },1000);
+}
+let timerInt=null;
+function timerAdvance(){
+  const t=activeTimer, a=t.a;
+  if(t.phase==="work"){
+    t.set++;
+    current.progress[a.id].setsDone=t.set;
+    saveCurrent(current);
+    if(t.set>=a.sets){ finishTimer(); return; }
+    if(a.rest>0){ t.phase="rest"; t.remaining=a.rest; cueRest(); vibrate([20,40]); }
+    else { t.phase="work"; t.remaining=a.work; cueWork(); vibrate(30); }
+  } else {
+    t.phase="work"; t.remaining=a.work; cueWork(); vibrate(30);
+  }
+}
+function finishTimer(){
+  if(timerInt) clearInterval(timerInt);
+  cueDone(); vibrate([40,60,40,60]);
+  const id=activeTimer.actId; activeTimer=null;
+  closeTimerOverlay();
+  refreshActivity(id);
+  toast("Drill complete ✓");
+}
+function renderTimerOverlay(){
+  const root=document.getElementById("overlayRoot");
+  const t=activeTimer, a=t.a;
+  const setName = a.setLabel? a.setLabel[Math.min(t.set,a.setLabel.length-1)] : `Set ${t.set+1} of ${a.sets}`;
+  root.innerHTML=`
+  <div class="overlay">
+    <div class="ov-head">
+      <div class="nm">${a.name}</div>
+      <button class="xbtn" onclick="quitTimer()">✕</button>
+    </div>
+    <div class="ring-wrap">
+      <div class="ring">
+        <svg width="264" height="264" viewBox="0 0 264 264">
+          <circle cx="132" cy="132" r="120" fill="none" stroke="#232A34" stroke-width="16"/>
+          <circle id="ringProg" cx="132" cy="132" r="120" fill="none" stroke="url(#g)" stroke-width="16"
+            stroke-linecap="round" stroke-dasharray="${2*Math.PI*120}" stroke-dashoffset="0"/>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FF7A3C"/><stop offset="1" stop-color="#FFA600"/></linearGradient></defs>
+        </svg>
+        <div class="center">
+          <div class="phase ${t.phase}" id="ovPhase">${t.phase==="work"?"WORK":"REST"}</div>
+          <div class="tnum" id="ovNum">${t.remaining}</div>
+          <div class="sets" id="ovSets">${setName}</div>
+        </div>
+      </div>
+    </div>
+    <div class="ov-ctrls">
+      <button onclick="skipTimer()">Skip ›</button>
+      <button class="main" id="ovPause" onclick="togglePauseTimer()">Pause</button>
+    </div>
+  </div>`;
+  updateTimerOverlay();
+}
+function updateTimerOverlay(){
+  const t=activeTimer; if(!t) return;
+  const a=t.a;
+  const num=document.getElementById("ovNum"); if(num) num.textContent=t.remaining;
+  const ph=document.getElementById("ovPhase");
+  if(ph){ ph.textContent=t.phase==="work"?"WORK":"REST"; ph.className="phase "+t.phase; }
+  const setName = a.setLabel? a.setLabel[Math.min(t.set,a.setLabel.length-1)] : `Set ${Math.min(t.set+1,a.sets)} of ${a.sets}`;
+  const st=document.getElementById("ovSets"); if(st) st.textContent= t.phase==="rest"? "Rest · next: "+setName : setName;
+  const ring=document.getElementById("ringProg");
+  if(ring){ const totalT=t.phase==="work"?a.work:a.rest; const frac=t.remaining/totalT;
+    ring.style.strokeDashoffset = (2*Math.PI*120)*(1-frac); ring.style.stroke = t.phase==="rest"?"#3B82F6":"url(#g)"; }
+}
+function togglePauseTimer(){ const t=activeTimer; if(!t) return; t.running=!t.running; document.getElementById("ovPause").textContent=t.running?"Pause":"Resume"; }
+function skipTimer(){ if(!activeTimer) return; cueTick(); timerAdvance(); updateTimerOverlay(); }
+function quitTimer(){
+  if(timerInt) clearInterval(timerInt);
+  const id=activeTimer.actId; activeTimer=null;
+  closeTimerOverlay(); refreshActivity(id);
+}
+function closeTimerOverlay(){ document.getElementById("overlayRoot").innerHTML=""; if(timerInt) clearInterval(timerInt); }
+
+/* =====================================================================
+   HISTORY
+   ===================================================================== */
+function renderHistory(){
+  removeFinishBar();
+  const sessions=loadSessions().slice().reverse(); // newest first
+  let html=`<div class="topbar"><div class="brand"><span class="ball"></span>Progress</div></div>`;
+
+  if(!sessions.length){
+    html+=`<div class="empty"><div class="em">📊</div><p><b>No sessions yet.</b><br>Finish your first training session and your progress will show up here.</p>
+      <button class="btn-primary" style="max-width:260px;margin:24px auto 0" onclick="goHome()">Start training</button>
+      <button class="btn-ghost" style="max-width:260px;margin:12px auto 0" onclick="importData()">⬆ Import a backup</button></div>`;
+    app.innerHTML=html; return;
+  }
+
+  const all=loadSessions();
+  const streak=computeStreak(all);
+  const best=Math.max(...all.map(s=>s.makes||0));
+  const avgComplete=Math.round(all.reduce((x,s)=>x+(s.completed/s.total),0)/all.length*100);
+  const totalMakes=all.reduce((x,s)=>x+(s.makes||0),0);
+
+  // headline stats
+  html+=`<div class="stat-grid">
+    <div class="stat"><div class="num accent">${streak}<span class="unit">week${streak===1?"":"s"}</span></div><div class="lbl">Weekly streak</div></div>
+    <div class="stat"><div class="num">${all.length}</div><div class="lbl">Total sessions</div></div>
+    <div class="stat"><div class="num green">${avgComplete}<span class="unit">%</span></div><div class="lbl">Avg completion</div></div>
+    <div class="stat"><div class="num">${best}<span class="unit">makes</span></div><div class="lbl">Best session</div></div>
+  </div>`;
+
+  // makes trend chart (last 10)
+  const recent=all.slice(-10);
+  const maxMakes=Math.max(1,...recent.map(s=>s.makes||0));
+  html+=`<div class="section-label">Shooting makes — last ${recent.length} session${recent.length>1?"s":""}</div>
+    <div class="card">
+      <div class="chart">`;
+  for(const s of recent){ const h=Math.round((s.makes||0)/maxMakes*100); html+=`<div class="bar" style="height:${Math.max(4,h)}%" title="${s.makes} makes"></div>`; }
+  html+=`</div><div class="chart-x">`;
+  for(const s of recent){ html+=`<span>${new Date(s.startedAt).toLocaleDateString(undefined,{day:"numeric",month:"numeric"})}</span>`; }
+  html+=`</div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;color:var(--muted);font-size:12.5px;font-weight:600">
+        <span>${totalMakes} total makes logged</span><span>Latest: ${recent[recent.length-1].makes} makes</span>
+      </div>
+    </div>`;
+
+  // session log
+  html+=`<div class="section-label">Session history</div><div class="card" style="padding:4px 16px">`;
+  for(const s of sessions){
+    const pct=Math.round(s.completed/s.total*100);
+    const dur = s.endedAt? fmtDur(s.endedAt-s.startedAt) : "—";
+    const ftAct = s.progress.freethrows; const ftPct = ftAct&&ftAct.att? Math.round(ftAct.made/ftAct.att*100):null;
+    html+=`<div class="hist-item">
+      <div class="hist-ring">${ringSVG(pct)}<div class="pc" style="color:${pct===100?'var(--success)':'var(--accent2)'}">${pct}%</div></div>
+      <div class="hist-meta">
+        <div class="d">${fmtDate(s.startedAt)}</div>
+        <div class="s">${s.completed}/${s.total} drills · ${dur} · ${s.makes||0} makes${ftPct!==null?` · ${ftPct}% FT`:""}</div>
+      </div>
+    </div>`;
+  }
+  html+=`</div>`;
+
+  // backup
+  html+=`<div class="section-label">Backup</div>
+    <div class="card">
+      <p style="color:var(--muted);font-size:13.5px;line-height:1.5;margin-bottom:14px">Your data is saved only on this device. Export a backup file to keep it safe or move it to another phone.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn-ghost" onclick="exportData()">⬇ Export</button>
+        <button class="btn-ghost" onclick="importData()">⬆ Import</button>
+      </div>
+    </div>
+    <div style="height:10px"></div>`;
+  app.innerHTML=html;
+}
+function ringSVG(pct){
+  const r=20,c=2*Math.PI*r,off=c*(1-pct/100);
+  const col=pct===100?"#34D399":"#FFA600";
+  return `<svg width="46" height="46" viewBox="0 0 46 46" style="transform:rotate(-90deg)">
+    <circle cx="23" cy="23" r="${r}" fill="none" stroke="#232A34" stroke-width="4"/>
+    <circle cx="23" cy="23" r="${r}" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg>`;
+}
+
+/* =====================================================================
+   NAV
+   ===================================================================== */
+function renderNav(){
+  const nav=document.getElementById("nav");
+  const inSession = view==="session";
+  nav.innerHTML=`
+    <button class="${view==='home'?'on':''}" onclick="goHome()"><span class="ico">🏠</span>Home</button>
+    <button class="${inSession?'on':''}" onclick="goSession()"><span class="ico">🏀</span>${current?'Session':'Train'}</button>
+    <button class="${view==='history'?'on':''}" onclick="goHistory()"><span class="ico">📊</span>Progress</button>`;
+  nav.classList.toggle("hidden", inSession); // hide nav during active session for focus
+}
+function goHome(){ view="home"; render(); window.scrollTo(0,0); }
+function goHistory(){ removeFinishBar(); view="history"; render(); window.scrollTo(0,0); }
+function goSession(){ if(current){ resumeSession(); } else { startSession(); } }
+
+/* =====================================================================
+   MODAL + TOAST
+   ===================================================================== */
+function showModal({title,body,actions}){
+  const root=document.getElementById("modalRoot");
+  let h=`<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal"><h3>${title}</h3><p>${body}</p><div class="acts">`;
+  actions.forEach((a,i)=>{ h+=`<button class="${a.cls}" data-i="${i}" style="${a.style||''}">${a.label}</button>`; });
+  h+=`</div></div></div>`;
+  root.innerHTML=h;
+  root.querySelectorAll("[data-i]").forEach(btn=>btn.onclick=()=>actions[+btn.dataset.i].fn());
+}
+function closeModal(){ document.getElementById("modalRoot").innerHTML=""; }
+
+/* ---------- Info bottom sheet (swipe up/down or tap outside to dismiss) ---------- */
+function showInfo(id){
+  const a=ALL_ACTS.find(x=>x.id===id); const bullets=INFO[id]; if(!a||!bullets) return;
+  const emoji=(ROUTINE.find(p=>p.id===a.phase)||{}).emoji||"🏀";
+  const root=document.getElementById("infoRoot");
+  root.innerHTML=`
+    <div class="sheet-bg" onclick="if(event.target===this)closeInfo()">
+      <div class="sheet" id="infoSheet">
+        <div class="sheet-grab"></div>
+        <div class="sheet-emoji">${emoji}</div>
+        <h3>${a.name}</h3>
+        <div class="sheet-sub">How to do it</div>
+        <ul>${bullets.map(b=>`<li>${b}</li>`).join("")}</ul>
+        <button class="sheet-close" onclick="closeInfo()">Got it</button>
+      </div>
+    </div>`;
+  requestAnimationFrame(()=>{ const bg=root.querySelector(".sheet-bg"); if(bg) bg.classList.add("show"); });
+  vibrate(8); attachSheetSwipe();
+}
+function closeInfo(dir){
+  const root=document.getElementById("infoRoot"); const bg=root.querySelector(".sheet-bg");
+  if(!bg) return; bg.classList.remove("show");
+  const sheet=document.getElementById("infoSheet");
+  if(sheet){ sheet.style.transition="transform .26s ease-in"; sheet.style.transform="translateY("+(dir<0?"-100%":"100%")+")"; }
+  setTimeout(()=>{ root.innerHTML=""; },280);
+}
+function attachSheetSwipe(){
+  const sheet=document.getElementById("infoSheet"); if(!sheet) return;
+  let startY=0, dy=0, dragging=false;
+  sheet.addEventListener("touchstart",e=>{ startY=e.touches[0].clientY; dy=0; dragging=true; sheet.style.transition="none"; },{passive:true});
+  sheet.addEventListener("touchmove",e=>{ if(!dragging) return; dy=e.touches[0].clientY-startY; sheet.style.transform="translateY("+dy+"px)"; },{passive:true});
+  sheet.addEventListener("touchend",()=>{ if(!dragging) return; dragging=false;
+    if(Math.abs(dy)>70){ closeInfo(dy<0?-1:1); } else { sheet.style.transition="transform .2s ease"; sheet.style.transform="translateY(0)"; } });
+}
+
+/* ---------- Export / Import backup ---------- */
+function exportData(){
+  const sessions=loadSessions();
+  const data=JSON.stringify({app:"hoops",version:1,exportedAt:Date.now(),sessions},null,2);
+  const blob=new Blob([data],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download="hoops-backup-"+todayKey()+".json";
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast(sessions.length?`Exported ${sessions.length} session${sessions.length===1?"":"s"}`:"Exported (no sessions yet)");
+}
+function importData(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
+  inp.onchange=e=>{
+    const f=e.target.files&&e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      let arr;
+      try{ const d=JSON.parse(r.result); arr=Array.isArray(d)?d:d.sessions; if(!Array.isArray(arr)) throw 0; }
+      catch(err){ toast("Couldn't read that file"); return; }
+      showModal({ title:"Import backup?", body:`Found ${arr.length} session${arr.length===1?"":"s"} in this file. Replace your current data, or merge them in alongside what's already here?`,
+        actions:[
+          { label:"Replace all", cls:"danger", fn:()=>{ saveSessions(arr); closeModal(); render(); toast(`Imported ${arr.length} session${arr.length===1?"":"s"}`); } },
+          { label:"Merge (keep both)", cls:"neutral", fn:()=>{ const merged=mergeSessions(loadSessions(),arr); saveSessions(merged); closeModal(); render(); toast(`Merged — ${merged.length} total`); } },
+          { label:"Cancel", cls:"neutral", fn:closeModal },
+        ]});
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+function mergeSessions(a,b){ const map=new Map(); [...a,...b].forEach(s=>{ if(s&&s.startedAt!=null) map.set(s.startedAt,s); }); return [...map.values()].sort((x,y)=>x.startedAt-y.startedAt); }
+
+let toastT=null;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); if(toastT)clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1800); }
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+// clean finish bar on non-session views
+const _origRender=render;
+render=function(){ if(view!=="session") removeFinishBar(); _origRender(); };
+
+render();
+
+// keep clock alive when returning to tab
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && view==="session") startSessionClock(); });
+</script>
+</body>
+</html>
