@@ -25,7 +25,8 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+    -webkit-font-smoothing:antialiased;overscroll-behavior-y:none;
+    -webkit-overflow-scrolling:touch}
   body{max-width:560px;margin:0 auto;min-height:100vh;position:relative}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   h1,h2,h3,h4,p{margin:0}
@@ -191,6 +192,10 @@
   .hist-meta .d{font-weight:700;font-size:15px}
   .hist-meta .s{color:var(--muted);font-size:12.5px;margin-top:2px}
   .hist-chevron{color:var(--faint);font-size:20px}
+  .hist-del{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;
+    background:var(--surface2);border:1px solid var(--border);color:var(--muted2);transition:transform .12s,background .15s,color .15s,border-color .15s}
+  .hist-del:active{transform:scale(.88);background:rgba(242,84,91,.15);border-color:rgba(242,84,91,.45);color:var(--danger)}
+  .hist-del svg{width:17px;height:17px;display:block}
   .empty{text-align:center;color:var(--muted);padding:50px 20px}
   .empty .em{font-size:46px;margin-bottom:14px}
   .empty p{font-size:15px;line-height:1.5}
@@ -312,6 +317,8 @@ const INFO = {
   game: ["Throw the ball off the backboard to yourself","Chase it and catch it like grabbing a rebound","Shoot straight away at game speed — quick, not slow","Move to a new spot and repeat","Count every make"],
   freethrows: ["Stand at the free-throw line, feet about shoulder-width apart","Do the same routine every time (e.g. two bounces, deep breath)","Bend your knees and keep your eyes on the rim","Push up smoothly and flick your wrist","Tap 'Made' or 'Miss' after each shot to track your accuracy"],
 };
+
+const TRASH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`;
 
 /* =====================================================================
    STORAGE
@@ -884,6 +891,7 @@ function renderHistory(){
         <div class="d">${fmtDate(s.startedAt)}</div>
         <div class="s">${s.completed}/${s.total} drills · ${dur} · ${s.makes||0} makes${ftPct!==null?` · ${ftPct}% FT`:""}</div>
       </div>
+      <button class="hist-del" onclick="confirmDeleteSession(${s.startedAt})" aria-label="Delete session">${TRASH_SVG}</button>
     </div>`;
   }
   html+=`</div>`;
@@ -900,6 +908,21 @@ function renderHistory(){
     <div style="height:10px"></div>`;
   app.innerHTML=html;
 }
+function confirmDeleteSession(startedAt){
+  const s=loadSessions().find(x=>x.startedAt===startedAt);
+  const when = s? fmtFullDate(s.startedAt) : "this session";
+  const detail = s? `${s.completed}/${s.total} drills · ${s.makes||0} makes` : "";
+  showModal({
+    title:"Delete session?",
+    body:`Permanently remove your <b>${when}</b> session${detail?` (${detail})`:""} from your history. This can't be undone.`,
+    actions:[
+      { label:"Delete session", cls:"danger", fn:()=>{ deleteSession(startedAt); closeModal(); render(); toast("Session deleted"); } },
+      { label:"Cancel", cls:"neutral", fn:closeModal },
+    ]
+  });
+}
+function deleteSession(startedAt){ saveSessions(loadSessions().filter(s=>s.startedAt!==startedAt)); }
+
 function ringSVG(pct){
   const r=20,c=2*Math.PI*r,off=c*(1-pct/100);
   const col=pct===100?"#34D399":"#FFA600";
