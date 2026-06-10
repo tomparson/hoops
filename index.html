@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Hoops" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+<link rel="manifest" href="manifest.json" />
 <title>Hoops · Training Tracker</title>
 <style>
   :root{
@@ -32,12 +35,8 @@
   #app{padding:calc(var(--safe-top) + 8px) 16px calc(96px + var(--safe-bottom)) 16px;min-height:100vh}
   .topbar{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 18px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em}
-  .brand .ball{width:30px;height:30px;border-radius:50%;
-    background:radial-gradient(circle at 30% 28%,#FF8A4C,#E2541F);position:relative;flex:none;
-    box-shadow:0 2px 8px rgba(226,84,31,.5)}
-  .brand .ball:before,.brand .ball:after{content:"";position:absolute;background:#7a2d0f;opacity:.55}
-  .brand .ball:before{left:50%;top:0;width:1.5px;height:100%;transform:translateX(-50%)}
-  .brand .ball:after{top:50%;left:0;height:1.5px;width:100%;transform:translateY(-50%)}
+  .brand .ball{font-size:26px;line-height:1;flex:none;display:inline-flex;align-items:center;
+    filter:drop-shadow(0 2px 6px rgba(226,84,31,.45))}
   .topbar .date{color:var(--muted);font-size:13px;font-weight:600}
 
   /* ---------- Cards ---------- */
@@ -445,7 +444,7 @@ function renderHome(){
 
   let html = `
   <div class="topbar">
-    <div class="brand"><span class="ball"></span>Hoops</div>
+    <div class="brand"><span class="ball">🏀</span>Hoops</div>
     <div class="date">${new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"short"})}</div>
   </div>`;
 
@@ -835,7 +834,7 @@ function closeTimerOverlay(){ document.getElementById("overlayRoot").innerHTML="
 function renderHistory(){
   removeFinishBar();
   const sessions=loadSessions().slice().reverse(); // newest first
-  let html=`<div class="topbar"><div class="brand"><span class="ball"></span>Progress</div></div>`;
+  let html=`<div class="topbar"><div class="brand"><span class="ball">🏀</span>Progress</div></div>`;
 
   if(!sessions.length){
     html+=`<div class="empty"><div class="em">📊</div><p><b>No sessions yet.</b><br>Finish your first training session and your progress will show up here.</p>
@@ -918,7 +917,7 @@ function renderNav(){
   const inSession = view==="session";
   nav.innerHTML=`
     <button class="${view==='home'?'on':''}" onclick="goHome()"><span class="ico">🏠</span>Home</button>
-    <button class="${inSession?'on':''}" onclick="goSession()"><span class="ico">🏀</span>${current?'Session':'Train'}</button>
+    <button class="${inSession?'on':''}" onclick="goSession()"><span class="ico">⛹️</span>${current?'Session':'Train'}</button>
     <button class="${view==='history'?'on':''}" onclick="goHistory()"><span class="ico">📊</span>Progress</button>`;
   nav.classList.toggle("hidden", inSession); // hide nav during active session for focus
 }
