@@ -217,6 +217,15 @@
   .chart .bar:last-child{opacity:1;box-shadow:0 0 0 2px rgba(255,166,0,.4)}
   .chart-x{display:flex;gap:6px;margin-top:6px}
   .chart-x span{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:600}
+  /* per-drill time charts (home) — shorter bar = faster; fastest highlighted */
+  .chart-card{padding:14px 16px}
+  .chart-card + .chart-card{margin-top:12px}
+  .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px}
+  .chart-head .ct{font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+  .chart-head .cmeta{font-size:11.5px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
+  .tchart{display:flex;align-items:flex-end;gap:6px;height:88px}
+  .tbar{flex:1;background:var(--surface3);border-radius:5px 5px 2px 2px;min-height:5px;transition:height .3s}
+  .tbar.best{background:linear-gradient(180deg,#34D399,#0E9C68)}
   .hist-item{display:flex;align-items:center;gap:14px;padding:15px 0}
   .hist-item + .hist-item{border-top:1px solid var(--border)}
   .hist-ring{width:46px;height:46px;flex:none;position:relative}
@@ -346,12 +355,12 @@ const ROUTINE = [
   { id:"dribbling", name:"Dribbling", emoji:"🏀", dur:"15 min", acts:[
     { id:"pound",    type:"timer", name:"Pound dribbles", note:"Hard as you can — eyes up",
       sets:4, work:45, rest:15, setLabel:["Right hand","Left hand","Right hand","Left hand"] },
-    { id:"downback", type:"timer", name:"Baseline to halfway & back", note:"Dribble baseline → halfway line and back, same hand each trip",
-      sets:4, work:20, rest:10, setLabel:["Right hand","Left hand","Right hand","Left hand"] },
-    { id:"crossover",type:"timer", name:"Crossover", note:"At a cone or water bottle",
-      sets:1, work:180, rest:0 },
-    { id:"speed",    type:"task", name:"Speed dribbles", doneLabel:"6 lengths",
-      note:"Both hands, alternating · full-court length" },
+    { id:"downback", type:"stopwatch", name:"Baseline to halfway & back", target:6, unit:"reps",
+      note:"Baseline → halfway line and back · 3 trips per hand — time all 6" },
+    { id:"crossover",type:"stopwatch", name:"Crossover", target:10, unit:"reps",
+      note:"At a cone or water bottle · alternate starting hand — time all 10" },
+    { id:"speed",    type:"stopwatch", name:"Speed dribbles", target:6, unit:"lengths",
+      note:"Both hands, alternating · full-court length — time all 6" },
   ]},
   { id:"shooting", name:"Shooting", emoji:"🎯", dur:"20 min", acts:[
     { id:"form",    type:"stopwatch", name:"Form shots", target:20, makes:true,
@@ -373,9 +382,9 @@ const INFO = {
   sprintback: ["Sprint forward as fast as you can to a line","At the line, stop and run backwards (backpedal) to the start","Stay low going backwards so you don't fall","Pump your arms in both directions","It's about quick, explosive changes of direction"],
   closeouts: ["Start standing under the basket","Sprint out towards the 3-point line","As you get close, take quick little choppy steps to slow down","Drop into a low stance with your hands up, like guarding a shooter","Slide sideways two steps, then jog back and go again"],
   pound: ["Bounce the ball hard into the floor, over and over","Use just one hand at a time","Keep your head up and eyes forward — don't look at the ball","Pound it about waist height, as hard as you can","Switch hands each set — 2 sets per hand"],
-  downback: ["Start on the baseline with the ball","Dribble fast to the halfway line and straight back","Use the SAME hand for the whole trip down and back","Keep your eyes up and the ball low and quick","2 trips with each hand — 4 trips in total"],
-  crossover: ["Put a cone or water bottle on the ground","Dribble up to it, then do a move to switch the ball to your other hand","Crossover: bounce it quickly across your body to the other hand","Between-legs: bounce it under one leg to the other hand","Behind-back: wrap it around your back to the other hand","Stay low and keep your eyes up the whole time"],
-  speed: ["Push the ball out in front and run the full court length","Alternate hands as you go — right, left, right","Dribble a little higher and further ahead so you can move fast","Keep your eyes up, not on the ball","One full court length = one rep; do 6 in total"],
+  downback: ["Start on the baseline with the ball","Dribble fast to the halfway line and straight back = 1 rep","Use the SAME hand for the whole rep","Do 3 reps with each hand — 6 in total","Start the timer and try to beat your time each session"],
+  crossover: ["Put a cone or water bottle on the ground","Dribble up and do a move to switch the ball to your other hand","Mix it up: crossover, between-legs, behind-back","Alternate which hand you start with each time","Do 10 in total and time how long they take — stay low, eyes up"],
+  speed: ["Push the ball out in front and run the full court length","Alternate hands as you go — right, left, right","Dribble a little higher and further ahead so you can move fast","Keep your eyes up, not on the ball","One full length = one rep; do 6 and time them all"],
   form: ["Stand really close — about one big step from the hoop","Shoot one-handed with a high, soft arc (other hand just rests)","Start the timer and shoot until you make 20","Only makes count — chase your misses quickly","Try to beat your time each session"],
   spots: ["Set up 5 spots in a semicircle around the basket","Always start on the near right (as you look at the hoop)","Work around: near right → right wing → top → left wing → near left","At each spot, start its timer and shoot until you make 5","Beating your time at each angle shows where you're strongest"],
   rebound: ["Throw the ball off the backboard to yourself","Catch it like a rebound and lay it straight back up","Start the timer and do 15 lay-ups as fast as you can","Use the backboard each time; alternate sides if you like","Try to lower your time each session"],
@@ -536,19 +545,23 @@ function renderHome(){
   }
   html += `</div>`;
 
-  // Stats — wide weekly-streak banner, then two supporting stats
+  // Stats — three across (weekly streak, total sessions, avg completion)
+  const avg = sessions.length ? Math.round(sessions.reduce((x,s)=>x+(s.completed/s.total),0)/sessions.length*100) : 0;
   html += `
-  <div class="stat" style="margin-top:14px">
-    <div class="num accent">${streak}<span class="unit">week${streak===1?"":"s"}</span></div>
-    <div class="lbl">Weekly streak — train once a week to keep it alive 🔥</div>
-  </div>
-  <div class="stat-grid" style="margin-top:12px">
+  <div class="stat-grid three" style="margin-top:14px">
+    <div class="stat"><div class="num accent">${streak}<span class="unit">wk${streak===1?"":"s"}</span></div><div class="lbl">Weekly streak</div></div>
     <div class="stat"><div class="num green">${total}</div><div class="lbl">Total sessions</div></div>
-    <div class="stat"><div class="num">${last?(last.makes||0):0}<span class="unit">makes</span></div><div class="lbl">Last session makes</div></div>
+    <div class="stat"><div class="num">${avg}<span class="unit">%</span></div><div class="lbl">Avg completion</div></div>
   </div>`;
 
   // Weekly streak indicator (one tick per calendar week trained)
   html += `<div class="section-label">Weekly streak</div><div class="card">${weekStreakHTML(sessions)}</div>`;
+
+  // Drill time trends — one bar chart per timed drill, scroll down through them
+  const chronological = loadSessions();
+  const charts = TIMED_CHARTS.map(c=>drillChart(chronological,c.key,c.label)).filter(Boolean).join("");
+  html += `<div class="section-label">Drill times</div>`;
+  html += charts || `<div class="card"><p style="color:var(--muted);font-size:13.5px;line-height:1.5;margin:0">Your timed-drill charts appear here after your first session — watch your times come down week to week.</p></div>`;
 
   app.innerHTML = html;
 }
@@ -575,6 +588,46 @@ function weekStreakHTML(sessions){
     h+=`<div class="wd ${on?"on":""} ${isThis?"today":""}"><div class="dot">${on?"✓":""}</div><div class="lab">W${isoWeek(d)}</div></div>`;
   }
   return h+`</div>`;
+}
+
+/* timed drills to chart on the home page (lower bars = faster = better) */
+const TIMED_CHARTS = [
+  { key:"form",      label:"Form shots — make 20" },
+  { key:"spots",     label:"Spot shooting — 5 spots total" },
+  { key:"rebound",   label:"Rebound lay-ups — 15" },
+  { key:"downback",  label:"Baseline to halfway & back" },
+  { key:"crossover", label:"Crossover" },
+  { key:"speed",     label:"Speed dribbles" },
+];
+/* pull a chronological [{ts,secs}] series for one drill across saved sessions */
+function timeSeries(sessions, key){
+  const out=[];
+  for(const s of sessions){
+    const pr=s.progress; if(!pr) continue;
+    let secs=null;
+    if(key==="spots"){ const sp=pr.spots; if(sp&&sp.spots&&sp.spots.length&&sp.spots.every(v=>v!=null)) secs=sp.spots.reduce((a,b)=>a+b,0); }
+    else { const d=pr[key]; if(d&&d.seconds!=null) secs=d.seconds; }
+    if(secs!=null) out.push({ ts:s.startedAt, secs });
+  }
+  return out;
+}
+function drillChart(sessions, key, label){
+  const series=timeSeries(sessions,key).slice(-8);
+  if(!series.length) return "";
+  const max=Math.max(...series.map(p=>p.secs));
+  const best=Math.min(...series.map(p=>p.secs));
+  const latest=series[series.length-1].secs;
+  let bars="", xs="";
+  for(const p of series){
+    const h=Math.max(6, Math.round(p.secs/max*100));
+    bars+=`<div class="tbar ${p.secs===best?"best":""}" style="height:${h}%" title="${fmtClock(p.secs)}"></div>`;
+    xs+=`<span>${new Date(p.ts).toLocaleDateString(undefined,{day:"numeric",month:"numeric"})}</span>`;
+  }
+  return `<div class="card chart-card">
+    <div class="chart-head"><span class="ct">${label}</span><span class="cmeta">Best ${fmtClock(best)} · Now ${fmtClock(latest)}</span></div>
+    <div class="tchart">${bars}</div>
+    <div class="chart-x">${xs}</div>
+  </div>`;
 }
 
 /* =====================================================================
@@ -702,9 +755,10 @@ function renderActivity(a,pr){
       : `<button class="cta-btn" onclick="openTimer('${a.id}')"><span>⏱ Start</span><span class="cta-sub">${a.sets} × ${a.work}s${a.rest?` · ${a.rest}s rest`:""}${d.setsDone>0?` · ${d.setsDone}/${a.sets} done`:""}</span></button>`;
   }
   else if(a.type==="stopwatch"){
+    const goal = a.makes ? `${a.target} makes` : `${a.target} ${a.unit}`;
     inner+= d.seconds!=null
-      ? `<button class="cta-btn done" onclick="openStopwatch('${a.id}')"><span>✓ ${fmtClock(d.seconds)}</span><span class="cta-sub">${a.target} makes logged · tap to redo</span></button>`
-      : `<button class="cta-btn" onclick="openStopwatch('${a.id}')"><span>⏱ Start · make ${a.target}</span><span class="cta-sub">times how long it takes you</span></button>`;
+      ? `<button class="cta-btn done" onclick="openStopwatch('${a.id}')"><span>✓ ${fmtClock(d.seconds)}</span><span class="cta-sub">${goal} logged · tap to redo</span></button>`
+      : `<button class="cta-btn" onclick="openStopwatch('${a.id}')"><span>⏱ Start · ${goal}</span><span class="cta-sub">times how long it takes you</span></button>`;
   }
   else if(a.type==="spotstime"){
     inner+=`<div class="spot-list">`;
@@ -722,7 +776,7 @@ function renderActivity(a,pr){
 function tagFor(a){
   if(a.type==="timer") return `<span class="act-tag">⏱ ${a.sets} × ${a.work}s${a.rest?` · ${a.rest}s rest`:""}</span>`;
   if(a.type==="task") return `<span class="act-tag">🎯 ${a.doneLabel}</span>`;
-  if(a.type==="stopwatch") return `<span class="act-tag">⏱ time to make ${a.target}</span>`;
+  if(a.type==="stopwatch") return `<span class="act-tag">⏱ time · ${a.makes?`${a.target} makes`:`${a.target} ${a.unit}`}</span>`;
   if(a.type==="spotstime") return `<span class="act-tag">⏱ ${a.spotCount} spots · make ${a.perSpot} each</span>`;
   return "";
 }
@@ -893,7 +947,8 @@ function openStopwatch(id, spotIndex=null){
   const target = spotIndex!=null ? a.perSpot : a.target;
   const title  = spotIndex!=null ? a.spotLabels[spotIndex] : a.name;
   const step   = spotIndex!=null ? `Spot ${spotIndex+1} of ${a.spotCount}` : "";
-  activeStopwatch={ actId:id, spotIndex, title, step, target, start:Date.now() };
+  const goal   = spotIndex!=null ? `${target} makes` : (a.makes ? `${target} makes` : `${target} ${a.unit}`);
+  activeStopwatch={ actId:id, spotIndex, title, step, target, goal, start:Date.now() };
   renderStopwatchOverlay();
   cueWork(); vibrate(30);
   if(swInt) clearInterval(swInt);
@@ -949,14 +1004,14 @@ function renderStopwatchOverlay(){
       <div style="text-align:center">
         <div class="sw-spot">${t.title}</div>
         ${t.step?`<div class="sw-step">${t.step}</div>`:""}
-        <div class="sw-label">MAKE ${t.target}</div>
+        <div class="sw-label">${t.goal.toUpperCase()}</div>
         <div class="sw-time" id="swTime">0:00</div>
-        <div class="sw-hint">Hit the button the instant you make ${t.target}</div>
+        <div class="sw-hint">Stop the timer the moment you finish all ${t.goal}</div>
       </div>
     </div>
     <div class="ov-ctrls">
       <button onclick="cancelStopwatch()">Cancel</button>
-      <button class="main" onclick="finishStopwatch()">✓ Made ${t.target}</button>
+      <button class="main" onclick="finishStopwatch()">✓ Done</button>
     </div>
   </div>`;
   updateStopwatch();
@@ -968,7 +1023,7 @@ function renderStopwatchOverlay(){
 function renderHistory(){
   removeFinishBar();
   const sessions=loadSessions().slice().reverse(); // newest first
-  let html=`<div class="topbar"><div class="brand"><span class="ball">🏀</span>Progress</div></div>`;
+  let html=`<div class="topbar"><div class="brand"><span class="ball">🏀</span>Sessions</div></div>`;
 
   if(!sessions.length){
     html+=`<div class="empty"><div class="em">📊</div><p><b>No sessions yet.</b><br>Finish your first training session and your progress will show up here.</p>
@@ -976,33 +1031,6 @@ function renderHistory(){
       <button class="btn-ghost" style="max-width:260px;margin:12px auto 0" onclick="importData()">⬆ Import a backup</button></div>`;
     app.innerHTML=html; return;
   }
-
-  const all=loadSessions();
-  const streak=computeStreak(all);
-  const avgComplete=Math.round(all.reduce((x,s)=>x+(s.completed/s.total),0)/all.length*100);
-  const totalMakes=all.reduce((x,s)=>x+(s.makes||0),0);
-
-  // headline stats — three across
-  html+=`<div class="stat-grid three">
-    <div class="stat"><div class="num accent">${streak}<span class="unit">wk${streak===1?"":"s"}</span></div><div class="lbl">Weekly streak</div></div>
-    <div class="stat"><div class="num">${all.length}</div><div class="lbl">Total sessions</div></div>
-    <div class="stat"><div class="num green">${avgComplete}<span class="unit">%</span></div><div class="lbl">Avg completion</div></div>
-  </div>`;
-
-  // makes trend chart (last 10)
-  const recent=all.slice(-10);
-  const maxMakes=Math.max(1,...recent.map(s=>s.makes||0));
-  html+=`<div class="section-label">Shooting makes — last ${recent.length} session${recent.length>1?"s":""}</div>
-    <div class="card">
-      <div class="chart">`;
-  for(const s of recent){ const h=Math.round((s.makes||0)/maxMakes*100); html+=`<div class="bar" style="height:${Math.max(4,h)}%" title="${s.makes} makes"></div>`; }
-  html+=`</div><div class="chart-x">`;
-  for(const s of recent){ html+=`<span>${new Date(s.startedAt).toLocaleDateString(undefined,{day:"numeric",month:"numeric"})}</span>`; }
-  html+=`</div>
-      <div style="display:flex;justify-content:space-between;margin-top:12px;color:var(--muted);font-size:12.5px;font-weight:600">
-        <span>${totalMakes} total makes logged</span><span>Latest: ${recent[recent.length-1].makes} makes</span>
-      </div>
-    </div>`;
 
   // session log
   html+=`<div class="section-label">Session history</div><div class="card" style="padding:4px 16px">`;
@@ -1076,7 +1104,7 @@ function renderNav(){
   nav.innerHTML=`
     <button class="${view==='home'?'on':''}" onclick="goHome()"><span class="ico">🏠</span>Home</button>
     <button class="${inSession?'on':''}" onclick="goSession()"><span class="ico">⛹️</span>${current?'Session':'Train'}</button>
-    <button class="${view==='history'?'on':''}" onclick="goHistory()"><span class="ico">📊</span>Progress</button>`;
+    <button class="${view==='history'?'on':''}" onclick="goHistory()"><span class="ico">📊</span>Sessions</button>`;
   nav.classList.toggle("hidden", inSession); // hide nav during active session for focus
 }
 function goHome(){ view="home"; render(); window.scrollTo(0,0); }
