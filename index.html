@@ -152,6 +152,28 @@
     background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:15px;font-weight:700;font-size:16px}
   .timer-start.done{background:var(--successSoft);border-color:rgba(52,211,153,.35);color:var(--success)}
   .timer-start:active{transform:scale(.98)}
+
+  /* large CTA buttons inside Train cards — sized big for tapping mid-workout */
+  .cta-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;
+    margin-top:16px;min-height:140px;padding:18px;border:1px solid var(--border);border-radius:16px;
+    background:var(--surface2);font-weight:800;font-size:21px;color:var(--text);letter-spacing:-.01em;text-align:center;
+    transition:transform .08s,background .15s,border-color .15s}
+  .cta-btn:active{transform:scale(.98)}
+  .cta-btn.done{background:var(--successSoft);border-color:rgba(52,211,153,.4);color:var(--success)}
+  .cta-btn .cta-sub{font-size:13.5px;font-weight:600;color:var(--muted)}
+  .cta-btn.done .cta-sub{color:var(--success);opacity:.85}
+  .spot-list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+  .spot-btn{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:68px;padding:14px 18px;
+    border:1px solid var(--border);border-radius:14px;background:var(--surface2);
+    transition:transform .08s,background .15s,border-color .15s}
+  .spot-btn:active{transform:scale(.985)}
+  .spot-btn.done{background:var(--successSoft);border-color:rgba(52,211,153,.4)}
+  .spot-btn .sb-l{font-weight:700;font-size:16.5px;color:var(--text)}
+  .spot-btn .sb-t{font-weight:800;font-size:16px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .spot-btn.done .sb-t{color:var(--success)}
+  .sw-label{font-size:14px;font-weight:800;letter-spacing:.12em;color:var(--accent)}
+  .sw-time{font-size:88px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1;margin-top:10px}
+  .sw-hint{font-size:14px;color:var(--muted);margin:16px auto 0;font-weight:600;max-width:240px}
   .ft-row{display:flex;gap:10px;margin-top:16px}
   .ft-stat{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
   .ft-stat .fv{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -194,6 +216,7 @@
   .hist-meta{flex:1;min-width:0}
   .hist-meta .d{font-weight:700;font-size:15px}
   .hist-meta .s{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .hist-meta .s.times{color:var(--accent2);font-weight:600}
   .hist-chevron{color:var(--faint);font-size:20px}
   .hist-del{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;
     background:var(--surface2);border:1px solid var(--border);color:var(--muted2);transition:transform .12s,background .15s,color .15s,border-color .15s}
@@ -301,35 +324,35 @@
    ===================================================================== */
 const ROUTINE = [
   { id:"warmup", name:"Warm-up", emoji:"🤸", dur:"5 min", acts:[
-    { id:"jog",     type:"check",  name:"Jog the park perimeter" },
-    { id:"stretch", type:"check",  name:"Dynamic stretches", note:"Leg swings, lunges, ankle circles" },
+    { id:"stretch", type:"check", name:"Dynamic stretches", note:"Leg swings, lunges, ankle circles" },
+    { id:"jog",     type:"check", name:"Jog the park perimeter" },
   ]},
   { id:"agility", name:"Agility", emoji:"⚡", dur:"15 min", acts:[
     { id:"slides",     type:"timer", name:"Defensive slides", note:"Baseline to sideline, low stance",
       sets:4, work:30, rest:30 },
     { id:"sprintback", type:"timer", name:"Sprint–backpedal", note:"Between the lines, explode and recover",
       sets:4, work:30, rest:30 },
-    { id:"closeouts",  type:"counter", name:"Closeout reps", target:6,
-      note:"Sprint under basket → 3pt line, chop feet low, slide two steps. Rest 30s.", unit:"reps" },
+    { id:"closeouts",  type:"task", name:"Closeout reps", doneLabel:"6 reps",
+      note:"Sprint under basket → 3pt line, chop feet low, slide two steps. Rest 30s." },
   ]},
   { id:"dribbling", name:"Dribbling", emoji:"🏀", dur:"15 min", acts:[
-    { id:"pound",  type:"timer", name:"Pound dribbles", note:"Each hand, hard as you can — eyes up",
-      sets:2, work:45, rest:15, setLabel:["Right hand","Left hand"] },
-    { id:"moves",  type:"timer", name:"Crossover / between-legs / behind-back", note:"At a cone or water bottle",
+    { id:"pound",    type:"timer", name:"Pound dribbles", note:"Hard as you can — eyes up",
+      sets:4, work:45, rest:15, setLabel:["Right hand","Left hand","Right hand","Left hand"] },
+    { id:"downback", type:"timer", name:"Baseline to halfway & back", note:"Dribble baseline → halfway line and back, same hand each trip",
+      sets:4, work:20, rest:10, setLabel:["Right hand","Left hand","Right hand","Left hand"] },
+    { id:"crossover",type:"timer", name:"Crossover", note:"At a cone or water bottle",
       sets:1, work:180, rest:0 },
-    { id:"speed",  type:"counter", name:"Speed dribbles — weak hand", target:6,
-      note:"Full-court length, weak hand only", unit:"lengths" },
+    { id:"speed",    type:"task", name:"Speed dribbles", doneLabel:"6 lengths",
+      note:"Both hands, alternating · full-court length" },
   ]},
   { id:"shooting", name:"Shooting", emoji:"🎯", dur:"20 min", acts:[
-    { id:"form",  type:"counter", name:"Form shots", target:20, makes:true,
-      note:"1m from basket · one hand · perfect arc", unit:"makes" },
-    { id:"spots", type:"spots",   name:"Spot shooting", makes:true,
-      note:"5 spots around the key · 5 makes each", spotCount:5, perSpot:5 },
-    { id:"game",  type:"counter", name:"Game-speed reps", target:15, makes:true,
-      note:"Self-pass off backboard, catch, shoot", unit:"makes" },
-  ]},
-  { id:"cooldown", name:"Cool down", emoji:"🧊", dur:"5 min", acts:[
-    { id:"freethrows", type:"ft", name:"Free throws", note:"Catch your breath between shots" },
+    { id:"form",    type:"stopwatch", name:"Form shots", target:20, makes:true,
+      note:"1m from basket · one hand · perfect arc — time how long to make 20" },
+    { id:"spots",   type:"spotstime", name:"Spot shooting", makes:true, spotCount:5, perSpot:5,
+      spotLabels:["Near right","Right wing","Top","Left wing","Near left"],
+      note:"5 spots in a semicircle, starting near right — time each to 5 makes" },
+    { id:"rebound", type:"stopwatch", name:"Rebound lay-ups", target:15, makes:true,
+      note:"Self-pass off the backboard, catch, lay it up — time how long to do 15" },
   ]},
 ];
 
@@ -341,13 +364,13 @@ const INFO = {
   slides: ["Bend your knees and get low, like sitting on an invisible chair","Spread your feet wide and stay on the balls of your feet","Push off one foot to slide sideways — never cross your feet over","Keep your chest up and hands out wide","Slide one way, then back the other way"],
   sprintback: ["Sprint forward as fast as you can to a line","At the line, stop and run backwards (backpedal) to the start","Stay low going backwards so you don't fall","Pump your arms in both directions","It's about quick, explosive changes of direction"],
   closeouts: ["Start standing under the basket","Sprint out towards the 3-point line","As you get close, take quick little choppy steps to slow down","Drop into a low stance with your hands up, like guarding a shooter","Slide sideways two steps, then jog back and go again"],
-  pound: ["Bounce the ball hard into the floor, over and over","Use just one hand at a time","Keep your head up and eyes forward — don't look at the ball","Pound it about waist height, as hard as you can","Switch to your other hand when it's time"],
-  moves: ["Put a cone or water bottle on the ground","Dribble up to it, then do a move to switch the ball to your other hand","Crossover: bounce it quickly across your body to the other hand","Between-legs: bounce it under one leg to the other hand","Behind-back: wrap it around your back to the other hand","Stay low and keep your eyes up the whole time"],
-  speed: ["Use your weaker hand only — the one that feels awkward","Push the ball out in front and run with it the full court","Dribble a little higher and further ahead so you can move fast","Keep your eyes up, not on the ball","One full court length counts as one rep"],
-  form: ["Stand really close — about one big step from the hoop","Shoot with one hand only (your other hand just rests on the side)","Bend your knees and push the ball up softly","Aim for a high arc so it rainbows down into the net","Flick your wrist so your fingers point down at the end","Only count it when it goes in"],
-  spots: ["Pick 5 spots in a half-circle around the free-throw area","Stand at the first spot and shoot until you make 5","Then move to the next spot and do the same","Use proper form on every shot","Tap a spot box once for each make"],
-  game: ["Throw the ball off the backboard to yourself","Chase it and catch it like grabbing a rebound","Shoot straight away at game speed — quick, not slow","Move to a new spot and repeat","Count every make"],
-  freethrows: ["Stand at the free-throw line, feet about shoulder-width apart","Do the same routine every time (e.g. two bounces, deep breath)","Bend your knees and keep your eyes on the rim","Push up smoothly and flick your wrist","Tap 'Made' or 'Miss' after each shot to track your accuracy"],
+  pound: ["Bounce the ball hard into the floor, over and over","Use just one hand at a time","Keep your head up and eyes forward — don't look at the ball","Pound it about waist height, as hard as you can","Switch hands each set — 2 sets per hand"],
+  downback: ["Start on the baseline with the ball","Dribble fast to the halfway line and straight back","Use the SAME hand for the whole trip down and back","Keep your eyes up and the ball low and quick","2 trips with each hand — 4 trips in total"],
+  crossover: ["Put a cone or water bottle on the ground","Dribble up to it, then do a move to switch the ball to your other hand","Crossover: bounce it quickly across your body to the other hand","Between-legs: bounce it under one leg to the other hand","Behind-back: wrap it around your back to the other hand","Stay low and keep your eyes up the whole time"],
+  speed: ["Push the ball out in front and run the full court length","Alternate hands as you go — right, left, right","Dribble a little higher and further ahead so you can move fast","Keep your eyes up, not on the ball","One full court length = one rep; do 6 in total"],
+  form: ["Stand really close — about one big step from the hoop","Shoot one-handed with a high, soft arc (other hand just rests)","Start the timer and shoot until you make 20","Only makes count — chase your misses quickly","Try to beat your time each session"],
+  spots: ["Set up 5 spots in a semicircle around the basket","Always start on the near right (as you look at the hoop)","Work around: near right → right wing → top → left wing → near left","At each spot, start its timer and shoot until you make 5","Beating your time at each angle shows where you're strongest"],
+  rebound: ["Throw the ball off the backboard to yourself","Catch it like a rebound and lay it straight back up","Start the timer and do 15 lay-ups as fast as you can","Use the backboard each time; alternate sides if you like","Try to lower your time each session"],
 };
 
 const TRASH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`;
@@ -377,11 +400,10 @@ let activeTimer = null;      // timer overlay state
 function blankProgress(){
   const p = {};
   for(const a of ALL_ACTS){
-    if(a.type==="check")   p[a.id] = { done:false };
-    if(a.type==="counter") p[a.id] = { done:false, value:0 };
-    if(a.type==="timer")   p[a.id] = { done:false, setsDone:0 };
-    if(a.type==="spots")   p[a.id] = { done:false, spots:Array(a.spotCount).fill(0) };
-    if(a.type==="ft")      p[a.id] = { done:false, made:0, att:0 };
+    if(a.type==="check"||a.type==="task") p[a.id] = { done:false };
+    if(a.type==="timer")     p[a.id] = { done:false, setsDone:0 };
+    if(a.type==="stopwatch") p[a.id] = { done:false, seconds:null };
+    if(a.type==="spotstime") p[a.id] = { done:false, spots:Array(a.spotCount).fill(null) };
   }
   return p;
 }
@@ -393,11 +415,10 @@ function newSession(){
 function isActDone(a, pr){
   const d = pr[a.id];
   if(!d) return false;
-  if(a.type==="check")   return d.done;
-  if(a.type==="counter") return d.done || d.value >= a.target;
-  if(a.type==="timer")   return d.done || d.setsDone >= a.sets;
-  if(a.type==="spots")   return d.done || d.spots.every(v=>v>=a.perSpot);
-  if(a.type==="ft")      return d.done;
+  if(a.type==="check"||a.type==="task") return !!d.done;
+  if(a.type==="timer")     return d.done || d.setsDone >= a.sets;
+  if(a.type==="stopwatch") return d.done || d.seconds != null;
+  if(a.type==="spotstime") return d.done || d.spots.every(v=>v != null);
   return false;
 }
 function doneCount(pr){ return ALL_ACTS.filter(a=>isActDone(a,pr)).length; }
@@ -405,8 +426,9 @@ function sessionMakes(pr){
   let m=0;
   for(const a of ALL_ACTS){
     if(!a.makes) continue;
-    if(a.type==="counter") m += pr[a.id].value;
-    if(a.type==="spots")   m += pr[a.id].spots.reduce((x,y)=>x+y,0);
+    const d = pr[a.id]; if(!d) continue;
+    if(a.type==="stopwatch"){ if(d.seconds != null) m += a.target; }
+    if(a.type==="spotstime"){ m += d.spots.filter(v=>v != null).length * a.perSpot; }
   }
   return m;
 }
@@ -514,23 +536,11 @@ function renderHome(){
   </div>
   <div class="stat-grid" style="margin-top:12px">
     <div class="stat"><div class="num green">${total}</div><div class="lbl">Total sessions</div></div>
-    <div class="stat"><div class="num">${last?sessionMakes(last.progress):0}<span class="unit">makes</span></div><div class="lbl">Last session makes</div></div>
+    <div class="stat"><div class="num">${last?(last.makes||0):0}<span class="unit">makes</span></div><div class="lbl">Last session makes</div></div>
   </div>`;
 
-  // Week dots
-  html += `<div class="section-label">This week</div><div class="card">${weekDotsHTML(sessions)}</div>`;
-
-  // Routine preview
-  html += `<div class="section-label">Today's routine</div><div class="card" style="padding:6px 16px">`;
-  for(const p of ROUTINE){
-    html += `
-      <div class="phase-row">
-        <div class="phase-ico">${p.emoji}</div>
-        <div class="meta"><div class="nm">${p.name}</div><div class="ds">${p.acts.length} drill${p.acts.length>1?"s":""}</div></div>
-        <div class="dur">${p.dur}</div>
-      </div>`;
-  }
-  html += `</div>`;
+  // Weekly streak indicator (one tick per calendar week trained)
+  html += `<div class="section-label">Weekly streak</div><div class="card">${weekStreakHTML(sessions)}</div>`;
 
   app.innerHTML = html;
 }
@@ -538,16 +548,23 @@ function renderHome(){
 function todayHasSession(sessions){ return sessions.some(s=>s.date===todayKey()); }
 function todayHasSession(sessions){ return sessions.some(s=>s.date===todayKey()); }
 
-function weekDotsHTML(sessions){
-  const labels=["M","T","W","T","F","S","S"];
+function isoWeek(d){
+  const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const day=(x.getUTCDay()+6)%7; x.setUTCDate(x.getUTCDate()-day+3);
+  const firstThu=new Date(Date.UTC(x.getUTCFullYear(),0,4));
+  const fday=(firstThu.getUTCDay()+6)%7; firstThu.setUTCDate(firstThu.getUTCDate()-fday+3);
+  return 1+Math.round((x-firstThu)/(7*864e5));
+}
+function weekStreakHTML(sessions){
+  const trained=new Set(sessions.map(s=>weekKey(new Date(s.startedAt))));
   const now=new Date(); const day=(now.getDay()+6)%7;
-  const monday=new Date(now); monday.setHours(0,0,0,0); monday.setDate(now.getDate()-day);
-  const trained=new Set(sessions.map(s=>s.date));
+  const thisMon=new Date(now); thisMon.setHours(0,0,0,0); thisMon.setDate(now.getDate()-day);
+  const nowKey=weekKey(now);
   let h=`<div class="week-dots">`;
-  for(let i=0;i<7;i++){
-    const d=new Date(monday); d.setDate(monday.getDate()+i);
-    const key=todayKey(d); const on=trained.has(key); const isToday=key===todayKey();
-    h+=`<div class="wd ${on?"on":""} ${isToday?"today":""}"><div class="dot">${on?"✓":""}</div><div class="lab">${labels[i]}</div></div>`;
+  for(let i=6;i>=0;i--){
+    const d=new Date(thisMon); d.setDate(thisMon.getDate()-i*7);
+    const key=weekKey(d); const on=trained.has(key); const isThis=key===nowKey;
+    h+=`<div class="wd ${on?"on":""} ${isThis?"today":""}"><div class="dot">${on?"✓":""}</div><div class="lab">W${isoWeek(d)}</div></div>`;
   }
   return h+`</div>`;
 }
@@ -665,49 +682,40 @@ function renderActivity(a,pr){
         </div>
       </div>`;
 
-  if(a.type==="counter"){
-    inner+=`
-      <div class="counter">
-        <button class="cbtn" onclick="counter('${a.id}',-1)">−</button>
-        <div class="cval"><div class="v">${d.value}<span class="tgt"> / ${a.target}</span></div><div class="lab">${a.unit}</div></div>
-        <button class="cbtn plus big" onclick="counter('${a.id}',1)">+</button>
-      </div>`;
-  }
-  else if(a.type==="spots"){
-    inner+=`<div class="spots">`;
-    for(let i=0;i<a.spotCount;i++){
-      const v=d.spots[i]; const full=v>=a.perSpot;
-      inner+=`<button class="spot ${full?"full":""}" onclick="spotTap('${a.id}',${i})">
-        <div class="sn">Spot ${i+1}</div><div class="sv">${v}<span class="st">/${a.perSpot}</span></div></button>`;
-    }
-    inner+=`</div>`;
+  if(a.type==="task"){
+    inner+= done
+      ? `<button class="cta-btn done" onclick="toggleCheck('${a.id}')"><span>✓ Done · ${a.doneLabel}</span></button>`
+      : `<button class="cta-btn" onclick="toggleCheck('${a.id}')"><span>Done · ${a.doneLabel}</span><span class="cta-sub">tap when you've finished them all</span></button>`;
   }
   else if(a.type==="timer"){
-    const label = d.setsDone>=a.sets ? "All sets done" : `Start timer · ${a.sets}×${a.work}s`;
-    inner+=`<button class="timer-start ${d.setsDone>=a.sets?"done":""}" onclick="openTimer('${a.id}')">
-      ${d.setsDone>=a.sets?"✓ "+label : "⏱ "+label}${d.setsDone>0&&d.setsDone<a.sets?` · ${d.setsDone}/${a.sets} done`:""}</button>`;
+    const allDone = d.setsDone>=a.sets;
+    inner+= allDone
+      ? `<button class="cta-btn done" onclick="openTimer('${a.id}')"><span>✓ Done</span><span class="cta-sub">${a.sets} sets complete · tap to redo</span></button>`
+      : `<button class="cta-btn" onclick="openTimer('${a.id}')"><span>⏱ Start</span><span class="cta-sub">${a.sets} × ${a.work}s${a.rest?` · ${a.rest}s rest`:""}${d.setsDone>0?` · ${d.setsDone}/${a.sets} done`:""}</span></button>`;
   }
-  else if(a.type==="ft"){
-    const pct = d.att? Math.round(d.made/d.att*100):0;
-    inner+=`
-      <div class="ft-row">
-        <div class="ft-stat"><div class="fv">${d.made}</div><div class="fl">MADE</div></div>
-        <div class="ft-stat"><div class="fv">${d.att}</div><div class="fl">ATTEMPTS</div></div>
-        <div class="ft-stat pct"><div class="fv">${pct}%</div><div class="fl">ACCURACY</div></div>
-      </div>
-      <div class="ft-ctrls">
-        <button class="btn-ghost" onclick="ftTap('${a.id}',true)">＋ Made</button>
-        <button class="btn-ghost" onclick="ftTap('${a.id}',false)">＋ Miss</button>
-      </div>`;
+  else if(a.type==="stopwatch"){
+    inner+= d.seconds!=null
+      ? `<button class="cta-btn done" onclick="openStopwatch('${a.id}')"><span>✓ ${fmtClock(d.seconds)}</span><span class="cta-sub">${a.target} makes logged · tap to redo</span></button>`
+      : `<button class="cta-btn" onclick="openStopwatch('${a.id}')"><span>⏱ Start · make ${a.target}</span><span class="cta-sub">times how long it takes you</span></button>`;
+  }
+  else if(a.type==="spotstime"){
+    inner+=`<div class="spot-list">`;
+    for(let i=0;i<a.spotCount;i++){
+      const t=d.spots[i];
+      inner+= t!=null
+        ? `<button class="spot-btn done" onclick="openStopwatch('${a.id}',${i})"><span class="sb-l">${a.spotLabels[i]}</span><span class="sb-t">✓ ${fmtClock(t)}</span></button>`
+        : `<button class="spot-btn" onclick="openStopwatch('${a.id}',${i})"><span class="sb-l">${a.spotLabels[i]}</span><span class="sb-t">▶ make ${a.perSpot}</span></button>`;
+    }
+    inner+=`</div>`;
   }
   inner+=`</div>`;
   return inner;
 }
 function tagFor(a){
   if(a.type==="timer") return `<span class="act-tag">⏱ ${a.sets} × ${a.work}s${a.rest?` · ${a.rest}s rest`:""}</span>`;
-  if(a.type==="counter") return `<span class="act-tag">🎯 ${a.target} ${a.unit}</span>`;
-  if(a.type==="spots") return `<span class="act-tag">🎯 ${a.spotCount} spots × ${a.perSpot}</span>`;
-  if(a.type==="ft") return `<span class="act-tag">🏀 log makes & misses</span>`;
+  if(a.type==="task") return `<span class="act-tag">🎯 ${a.doneLabel}</span>`;
+  if(a.type==="stopwatch") return `<span class="act-tag">⏱ time to make ${a.target}</span>`;
+  if(a.type==="spotstime") return `<span class="act-tag">⏱ ${a.spotCount} spots · make ${a.perSpot} each</span>`;
   return "";
 }
 
@@ -868,6 +876,65 @@ function quitTimer(){
 function closeTimerOverlay(){ document.getElementById("overlayRoot").innerHTML=""; if(timerInt) clearInterval(timerInt); }
 
 /* =====================================================================
+   STOPWATCH OVERLAY (count-up — time how long to make N)
+   ===================================================================== */
+let activeStopwatch=null, swInt=null;
+function openStopwatch(id, spotIndex=null){
+  ensureAudio();
+  const a=ALL_ACTS.find(x=>x.id===id);
+  const target = spotIndex!=null ? a.perSpot : a.target;
+  const label  = spotIndex!=null ? `${a.spotLabels[spotIndex]} · make ${a.perSpot}` : `${a.name} · make ${a.target}`;
+  activeStopwatch={ actId:id, spotIndex, label, target, start:Date.now() };
+  renderStopwatchOverlay();
+  cueWork(); vibrate(30);
+  if(swInt) clearInterval(swInt);
+  swInt=setInterval(updateStopwatch,200);
+}
+function updateStopwatch(){
+  if(!activeStopwatch) return;
+  const el=document.getElementById("swTime");
+  if(el) el.textContent=fmtClock(Math.floor((Date.now()-activeStopwatch.start)/1000));
+}
+function finishStopwatch(){
+  if(!activeStopwatch) return;
+  const secs=Math.max(1,Math.round((Date.now()-activeStopwatch.start)/1000));
+  const {actId,spotIndex}=activeStopwatch;
+  const d=current.progress[actId];
+  if(spotIndex!=null){ d.spots[spotIndex]=secs; if(d.spots.every(v=>v!=null)) d.done=true; }
+  else { d.seconds=secs; d.done=true; }
+  if(swInt) clearInterval(swInt); activeStopwatch=null;
+  document.getElementById("overlayRoot").innerHTML="";
+  cueDone(); vibrate([40,60,40]);
+  refreshActivity(actId);
+  toast(`Logged · ${fmtClock(secs)}`);
+}
+function cancelStopwatch(){
+  if(swInt) clearInterval(swInt);
+  const id=activeStopwatch?activeStopwatch.actId:null; activeStopwatch=null;
+  document.getElementById("overlayRoot").innerHTML="";
+  if(id) refreshActivity(id);
+}
+function renderStopwatchOverlay(){
+  const t=activeStopwatch;
+  document.getElementById("overlayRoot").innerHTML=`
+  <div class="overlay">
+    <div class="ov-head"><div class="nm">${t.label}</div><button class="xbtn" onclick="cancelStopwatch()">✕</button></div>
+    <div class="ring-wrap">
+      <div style="text-align:center">
+        <div class="sw-label">MAKE ${t.target}</div>
+        <div class="sw-time" id="swTime">0:00</div>
+        <div class="sw-hint">Hit the button the instant you make ${t.target}</div>
+      </div>
+    </div>
+    <div class="ov-ctrls">
+      <button onclick="cancelStopwatch()">Cancel</button>
+      <button class="main" onclick="finishStopwatch()">✓ Made ${t.target}</button>
+    </div>
+  </div>`;
+  updateStopwatch();
+}
+
+/* =====================================================================
    HISTORY
    ===================================================================== */
 function renderHistory(){
@@ -922,6 +989,7 @@ function renderHistory(){
       <div class="hist-meta">
         <div class="d">${fmtDate(s.startedAt)}</div>
         <div class="s">${s.completed}/${s.total} drills · ${dur} · ${s.makes||0} makes${ftPct!==null?` · ${ftPct}% FT`:""}</div>
+        ${sessionTimesLine(s.progress)?`<div class="s times">${sessionTimesLine(s.progress)}</div>`:""}
       </div>
       <button class="hist-del" onclick="confirmDeleteSession(${s.startedAt})" aria-label="Delete session">${TRASH_SVG}</button>
     </div>`;
@@ -955,6 +1023,15 @@ function confirmDeleteSession(startedAt){
 }
 function deleteSession(startedAt){ saveSessions(loadSessions().filter(s=>s.startedAt!==startedAt)); }
 
+/* compact "⏱ Form 1:45 · Spots 3:20 · Lay-ups 1:10" line for a session, if it has timed drills */
+function sessionTimesLine(pr){
+  if(!pr) return "";
+  const parts=[];
+  if(pr.form && pr.form.seconds!=null) parts.push(`Form ${fmtClock(pr.form.seconds)}`);
+  if(pr.spots && pr.spots.spots){ const done=pr.spots.spots.filter(v=>v!=null); if(done.length) parts.push(`Spots ${fmtClock(done.reduce((x,y)=>x+y,0))}`); }
+  if(pr.rebound && pr.rebound.seconds!=null) parts.push(`Lay-ups ${fmtClock(pr.rebound.seconds)}`);
+  return parts.length ? "⏱ "+parts.join(" · ") : "";
+}
 function ringSVG(pct){
   const r=20,c=2*Math.PI*r,off=c*(1-pct/100);
   const col=pct===100?"#34D399":"#FFA600";
