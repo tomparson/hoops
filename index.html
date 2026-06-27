@@ -593,7 +593,12 @@ function weekStreakHTML(sessions){
 /* timed drills to chart on the home page (lower bars = faster = better) */
 const TIMED_CHARTS = [
   { key:"form",      label:"Form shots — make 20" },
-  { key:"spots",     label:"Spot shooting — 5 spots total" },
+  { key:"spots",     label:"Spot shooting — total (5 spots)" },
+  { key:"spots_0",   label:"Spot 1 · Near right" },
+  { key:"spots_1",   label:"Spot 2 · Right wing" },
+  { key:"spots_2",   label:"Spot 3 · Top" },
+  { key:"spots_3",   label:"Spot 4 · Left wing" },
+  { key:"spots_4",   label:"Spot 5 · Near left" },
   { key:"rebound",   label:"Rebound lay-ups — 15" },
   { key:"downback",  label:"Baseline to halfway & back" },
   { key:"crossover", label:"Crossover" },
@@ -606,6 +611,7 @@ function timeSeries(sessions, key){
     const pr=s.progress; if(!pr) continue;
     let secs=null;
     if(key==="spots"){ const sp=pr.spots; if(sp&&sp.spots&&sp.spots.length&&sp.spots.every(v=>v!=null)) secs=sp.spots.reduce((a,b)=>a+b,0); }
+    else if(key.startsWith("spots_")){ const idx=+key.slice(6); const sp=pr.spots; if(sp&&sp.spots&&sp.spots[idx]!=null) secs=sp.spots[idx]; }
     else { const d=pr[key]; if(d&&d.seconds!=null) secs=d.seconds; }
     if(secs!=null) out.push({ ts:s.startedAt, secs });
   }
@@ -948,7 +954,7 @@ function openStopwatch(id, spotIndex=null){
   const title  = spotIndex!=null ? a.spotLabels[spotIndex] : a.name;
   const step   = spotIndex!=null ? `Spot ${spotIndex+1} of ${a.spotCount}` : "";
   const goal   = spotIndex!=null ? `${target} makes` : (a.makes ? `${target} makes` : `${target} ${a.unit}`);
-  activeStopwatch={ actId:id, spotIndex, title, step, target, goal, start:Date.now() };
+  activeStopwatch={ actId:id, spotIndex, title, step, target, goal, start:Date.now(), accumulated:0, running:true };
   renderStopwatchOverlay();
   cueWork(); vibrate(30);
   if(swInt) clearInterval(swInt);
@@ -957,11 +963,16 @@ function openStopwatch(id, spotIndex=null){
 function updateStopwatch(){
   if(!activeStopwatch) return;
   const el=document.getElementById("swTime");
-  if(el) el.textContent=fmtClock(Math.floor((Date.now()-activeStopwatch.start)/1000));
+  if(el){
+    const sw=activeStopwatch;
+    const elapsed=sw.accumulated+(sw.running?Math.floor((Date.now()-sw.start)/1000):0);
+    el.textContent=fmtClock(elapsed);
+  }
 }
 function finishStopwatch(){
   if(!activeStopwatch) return;
-  const secs=Math.max(1,Math.round((Date.now()-activeStopwatch.start)/1000));
+  const sw=activeStopwatch;
+  const secs=Math.max(1,sw.accumulated+(sw.running?Math.round((Date.now()-sw.start)/1000):0));
   const {actId,spotIndex}=activeStopwatch;
   const a=ALL_ACTS.find(x=>x.id===actId);
   const d=current.progress[actId];
@@ -995,6 +1006,18 @@ function cancelStopwatch(){
   document.getElementById("overlayRoot").innerHTML="";
   if(id) refreshActivity(id);
 }
+function togglePauseStopwatch(){
+  const sw=activeStopwatch; if(!sw) return;
+  if(sw.running){
+    sw.accumulated+=Math.round((Date.now()-sw.start)/1000);
+    sw.running=false;
+  } else {
+    sw.start=Date.now();
+    sw.running=true;
+  }
+  const btn=document.getElementById("swPause");
+  if(btn) btn.textContent=sw.running?"Pause":"Resume";
+}
 function renderStopwatchOverlay(){
   const t=activeStopwatch;
   document.getElementById("overlayRoot").innerHTML=`
@@ -1011,6 +1034,7 @@ function renderStopwatchOverlay(){
     </div>
     <div class="ov-ctrls">
       <button onclick="cancelStopwatch()">Cancel</button>
+      <button id="swPause" onclick="togglePauseStopwatch()">Pause</button>
       <button class="main" onclick="finishStopwatch()">✓ Done</button>
     </div>
   </div>`;
@@ -1200,6 +1224,17 @@ function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg
 // clean finish bar on non-session views
 const _origRender=render;
 render=function(){ if(view!=="session") removeFinishBar(); _origRender(); };
+
+// fix: first session had downback logged as 45s (0:45) instead of 120s (2:00)
+(function(){
+  const sessions=loadSessions();
+  if(!sessions.length) return;
+  const first=sessions[0];
+  if(first.progress&&first.progress.downback&&first.progress.downback.seconds===45){
+    first.progress.downback.seconds=120;
+    saveSessions(sessions);
+  }
+})();
 
 render();
 
