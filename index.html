@@ -898,9 +898,10 @@ function renderActivity(a,pr){
     inner+=`<div class="spot-list">`;
     for(let i=0;i<a.spotCount;i++){
       const t=d.spots[i];
+      const slc=`var(--sl${i+1})`;
       inner+= t!=null
-        ? `<button class="spot-btn done" onclick="openStopwatch('${a.id}',${i})"><span class="sb-l">${a.spotLabels[i]}</span><span class="sb-t">✓ ${fmtClock(t)}</span></button>`
-        : `<button class="spot-btn" onclick="openStopwatch('${a.id}',${i})"><span class="sb-l">${a.spotLabels[i]}</span><span class="sb-t">▶ make ${a.perSpot}</span></button>`;
+        ? `<button class="spot-btn done" style="box-shadow:inset 3px 0 0 ${slc}" onclick="openStopwatch('${a.id}',${i})"><span class="sb-l" style="color:${slc}">${a.spotLabels[i]}</span><span class="sb-t">✓ ${fmtClock(t)}</span></button>`
+        : `<button class="spot-btn" style="box-shadow:inset 3px 0 0 ${slc}" onclick="openStopwatch('${a.id}',${i})"><span class="sb-l" style="color:${slc}">${a.spotLabels[i]}</span><span class="sb-t">▶ make ${a.perSpot}</span></button>`;
     }
     inner+=`</div>`;
   }
@@ -1082,7 +1083,8 @@ function openStopwatch(id, spotIndex=null){
   const title  = spotIndex!=null ? a.spotLabels[spotIndex] : a.name;
   const step   = spotIndex!=null ? `Spot ${spotIndex+1} of ${a.spotCount}` : "";
   const goal   = spotIndex!=null ? `${target} makes` : (a.makes ? `${target} makes` : `${target} ${a.unit}`);
-  activeStopwatch={ actId:id, spotIndex, title, step, target, goal, start:Date.now(), accumulated:0, running:true };
+  const spotColor = spotIndex!=null ? `var(--sl${spotIndex+1})` : null;
+  activeStopwatch={ actId:id, spotIndex, title, step, target, goal, start:Date.now(), accumulated:0, running:true, spotColor };
   renderStopwatchOverlay();
   cueWork(); vibrate(30);
   if(swInt) clearInterval(swInt);
@@ -1153,7 +1155,7 @@ function renderStopwatchOverlay(){
     <div class="ov-head"><div></div><button class="xbtn" onclick="cancelStopwatch()">✕</button></div>
     <div class="ring-wrap">
       <div style="text-align:center">
-        <div class="sw-spot">${t.title}</div>
+        <div class="sw-spot"${t.spotColor?` style="color:${t.spotColor}"`:""}>${t.title}</div>
         ${t.step?`<div class="sw-step">${t.step}</div>`:""}
         <div class="sw-label">${t.goal.toUpperCase()}</div>
         <div class="sw-time" id="swTime">0:00</div>
