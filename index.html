@@ -225,8 +225,10 @@
   .chart-head .ct{font-weight:700;font-size:14.5px;letter-spacing:-.01em}
   .chart-head .cmeta{font-size:11.5px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
   .tchart{display:flex;align-items:flex-end;gap:6px;height:88px}
-  .tbar{flex:1;background:var(--surface3);border-radius:5px 5px 2px 2px;min-height:5px;transition:height .3s}
+  .tbar{flex:1;background:var(--surface3);border-radius:5px 5px 2px 2px;min-height:5px;transition:height .3s;position:relative;overflow:visible}
   .tbar.best{background:linear-gradient(180deg,#34D399,#0E9C68)}
+  .tbar-val{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);line-height:1;pointer-events:none}
+  .tbar.best .tbar-val{color:#fff}
   /* spots line chart legend */
   .sl-legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:10px}
   .sl-leg-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);font-weight:600}
@@ -600,12 +602,9 @@ function weekStreakHTML(sessions){
 
 /* timed drills to chart on the home page (lower bars = faster = better) */
 const TIMED_CHARTS = [
-  { key:"form",      label:"Form shots — make 20" },
-  { key:"spots",     label:"Spot shooting — total (5 spots)" },
-  { key:"rebound",   label:"Rebound lay-ups — 15" },
-  { key:"downback",  label:"Baseline to halfway & back" },
-  { key:"crossover", label:"Crossover" },
-  { key:"speed",     label:"Speed dribbles" },
+  { key:"form",    label:"Form shots — make 20" },
+  { key:"spots",   label:"Spot shooting — total (5 spots)" },
+  { key:"rebound", label:"Rebound lay-ups — 15" },
 ];
 /* pull a chronological [{ts,secs}] series for one drill across saved sessions */
 function timeSeries(sessions, key){
@@ -628,7 +627,7 @@ function drillChart(sessions, key, label){
   let bars="", xs="";
   for(const p of series){
     const h=Math.max(6, Math.round(p.secs/max*100));
-    bars+=`<div class="tbar ${p.secs===best?"best":""}" style="height:${h}%" title="${fmtClock(p.secs)}"></div>`;
+    bars+=`<div class="tbar ${p.secs===best?"best":""}" style="height:${h}%" title="${fmtClock(p.secs)}"><span class="tbar-val">${fmtClock(p.secs)}</span></div>`;
     xs+=`<span>${new Date(p.ts).toLocaleDateString(undefined,{day:"numeric",month:"numeric"})}</span>`;
   }
   return `<div class="card chart-card">
