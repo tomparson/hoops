@@ -183,6 +183,11 @@
   .sw-label{font-size:14px;font-weight:800;letter-spacing:.12em;color:var(--accent);margin-top:16px}
   .sw-time{font-size:88px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1;margin-top:10px}
   .sw-hint{font-size:14px;color:var(--muted);margin:16px auto 0;font-weight:600;max-width:240px}
+  .spots-tips{margin-top:16px;display:flex;flex-direction:column;gap:7px;padding:14px 16px;background:var(--surface2);border-radius:12px}
+  .spots-tip{font-size:13.5px;color:var(--muted);font-weight:600;line-height:1.35;padding-left:18px;position:relative}
+  .spots-tip::before{content:"·";position:absolute;left:4px;color:var(--faint)}
+  .sw-tips{margin-top:14px;display:flex;flex-direction:column;gap:2px}
+  .sw-tip{font-size:12px;color:var(--faint);font-weight:600;line-height:1.5}
   .ft-row{display:flex;gap:10px;margin-top:16px}
   .ft-stat{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
   .ft-stat .fv{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -904,6 +909,11 @@ function renderActivity(a,pr){
         : `<button class="spot-btn" style="box-shadow:inset 3px 0 0 ${slc}" onclick="openStopwatch('${a.id}',${i})"><span class="sb-l" style="color:${slc}">${a.spotLabels[i]}</span><span class="sb-t">▶ make ${a.perSpot}</span></button>`;
     }
     inner+=`</div>`;
+    inner+=`<div class="spots-tips">
+      <div class="spots-tip">Focus on the hoop — like it's floating</div>
+      <div class="spots-tip">Visualise a rainbow arc line linking ball to hoop</div>
+      <div class="spots-tip">Take a 2s breath before each shot</div>
+    </div>`;
   }
   inner+=`</div>`;
   return inner;
@@ -1160,6 +1170,11 @@ function renderStopwatchOverlay(){
         <div class="sw-label">${t.goal.toUpperCase()}</div>
         <div class="sw-time" id="swTime">0:00</div>
         <div class="sw-hint">Stop the timer the moment you finish all ${t.goal}</div>
+        ${t.spotColor?`<div class="sw-tips">
+          <div class="sw-tip">Floating hoop</div>
+          <div class="sw-tip">Rainbow link</div>
+          <div class="sw-tip">2s breath</div>
+        </div>`:""}
       </div>
     </div>
     <div class="ov-ctrls">
