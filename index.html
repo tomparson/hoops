@@ -575,7 +575,7 @@ function renderHome(){
   const spotsLine = spotsLineChart(chronological);
   const barCharts = TIMED_CHARTS.map(c=>drillChart(chronological,c.key,c.label)).filter(Boolean).join("");
   const charts = [spotsLine, barCharts].filter(Boolean).join("");
-  html += `<div class="section-label">Drill times</div>`;
+  html += `<div class="section-label">Shooting performance</div>`;
   html += charts || `<div class="card"><p style="color:var(--muted);font-size:13.5px;line-height:1.5;margin:0">Your timed-drill charts appear here after your first session — watch your times come down week to week.</p></div>`;
 
   app.innerHTML = html;
