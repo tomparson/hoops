@@ -1176,7 +1176,7 @@ function renderStopwatchOverlay(){
           <div class="sw-tip">Rainbow link</div>
           <div class="sw-tip">Wrist snap</div>
           <div class="sw-tip">Deep breath</div>
-        </div>`:`<div class="sw-hint">Stop the timer the moment you finish all ${t.goal}</div>`}
+        </div>`:t.actId==="form"?`<div class="sw-tips"><div class="sw-tip">One hand</div></div>`:`<div class="sw-hint">Stop the timer the moment you finish all ${t.goal}</div>`}
       </div>
     </div>
     <div class="ov-ctrls">
