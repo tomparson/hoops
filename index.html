@@ -184,8 +184,7 @@
   .sw-time{font-size:88px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1;margin-top:10px}
   .sw-hint{font-size:14px;color:var(--muted);margin:16px auto 0;font-weight:600;max-width:240px}
   .spots-tips{margin-top:16px;display:flex;flex-direction:column;gap:7px;padding:14px 16px;background:var(--surface2);border-radius:12px}
-  .spots-tip{font-size:13.5px;color:var(--muted);font-weight:600;line-height:1.35;padding-left:18px;position:relative}
-  .spots-tip::before{content:"·";position:absolute;left:4px;color:var(--faint)}
+  .spots-tip{font-size:13.5px;color:var(--muted);font-weight:600;line-height:1.35}
   .sw-tips{margin-top:18px;display:flex;flex-direction:column;gap:6px}
   .sw-tip{font-size:32px;font-weight:800;color:var(--faint);line-height:1.1;letter-spacing:-.01em;white-space:nowrap}
   .ft-row{display:flex;gap:10px;margin-top:16px}
@@ -901,11 +900,11 @@ function renderActivity(a,pr){
   }
   else if(a.type==="spotstime"){
     inner+=`<div class="spots-tips">
-      <div class="spots-tip">Plant feet</div>
-      <div class="spots-tip">Floating hoop</div>
-      <div class="spots-tip">Rainbow link</div>
-      <div class="spots-tip">Wrist snap</div>
-      <div class="spots-tip">Deep breath</div>
+      <div class="spots-tip">1. Plant feet</div>
+      <div class="spots-tip">2. Floating hoop</div>
+      <div class="spots-tip">3. Rainbow link</div>
+      <div class="spots-tip">4. Wrist snap</div>
+      <div class="spots-tip">5. Deep breath</div>
     </div>`;
     inner+=`<div class="spot-list">`;
     for(let i=0;i<a.spotCount;i++){
