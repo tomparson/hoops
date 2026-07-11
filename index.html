@@ -901,11 +901,11 @@ function renderActivity(a,pr){
   }
   else if(a.type==="spotstime"){
     inner+=`<div class="spots-tips">
-      <div class="spots-tip">Focus on the hoop — like it's floating</div>
-      <div class="spots-tip">Visualise a rainbow arc line linking ball to hoop</div>
-      <div class="spots-tip">Take a 2s breath before each shot</div>
-      <div class="spots-tip">Feet shoulder width, point to basket</div>
-      <div class="spots-tip">Wrist snap for spin</div>
+      <div class="spots-tip">Plant feet</div>
+      <div class="spots-tip">Floating hoop</div>
+      <div class="spots-tip">Rainbow link</div>
+      <div class="spots-tip">Wrist snap</div>
+      <div class="spots-tip">Deep breath</div>
     </div>`;
     inner+=`<div class="spot-list">`;
     for(let i=0;i<a.spotCount;i++){
@@ -1172,11 +1172,11 @@ function renderStopwatchOverlay(){
         <div class="sw-label">${t.goal.toUpperCase()}</div>
         <div class="sw-time" id="swTime">0:00</div>
         ${t.spotColor?`<div class="sw-tips">
+          <div class="sw-tip">Plant feet</div>
           <div class="sw-tip">Floating hoop</div>
           <div class="sw-tip">Rainbow link</div>
-          <div class="sw-tip">2s breath</div>
-          <div class="sw-tip">Feet shoulder point</div>
           <div class="sw-tip">Wrist snap</div>
+          <div class="sw-tip">Deep breath</div>
         </div>`:`<div class="sw-hint">Stop the timer the moment you finish all ${t.goal}</div>`}
       </div>
     </div>
