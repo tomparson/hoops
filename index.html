@@ -183,6 +183,8 @@
   .sw-label{font-size:14px;font-weight:800;letter-spacing:.12em;color:var(--accent);margin-top:16px}
   .sw-time{font-size:88px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1;margin-top:10px}
   .sw-hint{font-size:14px;color:var(--muted);margin:16px auto 0;font-weight:600;max-width:240px}
+  @keyframes sw-breathe{0%,100%{transform:scale(0.82);opacity:0.45}50%{transform:scale(1.12);opacity:1}}
+  .sw-pulse{width:76px;height:76px;border-radius:50%;border:4px solid var(--accent);margin:22px auto 0;animation:sw-breathe 1.8s ease-in-out infinite}
   .spots-tips{margin-top:16px;display:flex;flex-direction:column;gap:7px;padding:14px 16px;background:var(--surface2);border-radius:12px}
   .spots-tip{font-size:13.5px;color:var(--muted);font-weight:600;line-height:1.35}
   .sw-tips{margin-top:18px;display:flex;flex-direction:column;gap:6px}
@@ -1095,7 +1097,8 @@ function openStopwatch(id, spotIndex=null){
   const step   = spotIndex!=null ? `Spot ${spotIndex+1} of ${a.spotCount}` : "";
   const goal   = spotIndex!=null ? `${target} makes` : (a.makes ? `${target} makes` : `${target} ${a.unit}`);
   const spotColor = spotIndex!=null ? `var(--sl${spotIndex+1})` : null;
-  activeStopwatch={ actId:id, spotIndex, title, step, target, goal, start:Date.now(), accumulated:0, running:true, spotColor };
+  const hideTime  = a.phase === "shooting";
+  activeStopwatch={ actId:id, spotIndex, title, step, target, goal, start:Date.now(), accumulated:0, running:true, spotColor, hideTime };
   renderStopwatchOverlay();
   cueWork(); vibrate(30);
   if(swInt) clearInterval(swInt);
@@ -1169,7 +1172,7 @@ function renderStopwatchOverlay(){
         <div class="sw-spot"${t.spotColor?` style="color:${t.spotColor}"`:""}>${t.title}</div>
         ${t.step?`<div class="sw-step">${t.step}</div>`:""}
         <div class="sw-label">${t.goal.toUpperCase()}</div>
-        <div class="sw-time" id="swTime">0:00</div>
+        ${t.hideTime?`<div class="sw-pulse"${t.spotColor?` style="border-color:${t.spotColor}"`:``}></div>`:`<div class="sw-time" id="swTime">0:00</div>`}
         ${t.spotColor?`<div class="sw-tips">
           <div class="sw-tip">Plant feet</div>
           <div class="sw-tip">Floating hoop</div>
