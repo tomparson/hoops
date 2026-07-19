@@ -540,36 +540,19 @@ function renderHome(){
     <div class="date">${new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"short"})}</div>
   </div>`;
 
-  // Hero
-  html += `<div class="hero"><div class="glow"></div>`;
+  // Start session button
+  html += `<div style="padding:16px 0 4px">`;
   if(hasActive){
-    html += `
-      <h2>Session in progress</h2>
-      <div class="big">${activeDone}<span style="font-size:20px;color:var(--muted)"> / ${TOTAL_ACTS} drills</span></div>
-      <div class="sub">Picked up where you left off</div>
-      <button class="btn-primary" onclick="resumeSession()">▶︎ Resume session</button>`;
+    html += `<button class="btn-primary" onclick="resumeSession()">▶︎ Resume session</button>`;
   } else {
     const trained = weekHasSession(sessions);
-    const greet = streak>0 ? `${streak}-week streak 🔥 — keep it rolling` : "Ready to put in the work?";
-    html += `
-      <h2>${trained?"Nice — trained this week ✅":"This week's session"}</h2>
-      <div class="big">1 Hour · Full Workout</div>
-      <div class="sub">${greet}</div>
-      <button class="btn-primary" onclick="startSession()">${trained?"＋ Start another session":"▶︎ Start training"}</button>`;
+    html += `<button class="btn-primary" onclick="startSession()">${trained?"＋ Start another session":"▶︎ Start training"}</button>`;
   }
   html += `</div>`;
 
-  // Stats — three across (weekly streak, total sessions, avg completion)
-  const avg = sessions.length ? Math.round(sessions.reduce((x,s)=>x+(s.completed/s.total),0)/sessions.length*100) : 0;
-  html += `
-  <div class="stat-grid three" style="margin-top:14px">
-    <div class="stat"><div class="num accent">${streak}<span class="unit">wk${streak===1?"":"s"}</span></div><div class="lbl">Weekly streak</div></div>
-    <div class="stat"><div class="num green">${total}</div><div class="lbl">Total sessions</div></div>
-    <div class="stat"><div class="num">${avg}<span class="unit">%</span></div><div class="lbl">Avg completion</div></div>
-  </div>`;
-
   // Weekly streak indicator (one tick per calendar week trained)
-  html += `<div class="section-label">Weekly streak</div><div class="card">${weekStreakHTML(sessions)}</div>`;
+  const streakLabel = streak===1 ? "1-week streak" : streak>1 ? `${streak}-week streak` : "Weekly streak";
+  html += `<div class="section-label">${streakLabel}</div><div class="card">${weekStreakHTML(sessions)}</div>`;
 
   // Drill time trends — spots line chart + one bar chart per timed drill
   const chronological = loadSessions();
@@ -1213,7 +1196,6 @@ function renderHistory(){
     const dur = s.endedAt? fmtDur(s.endedAt-s.startedAt) : "—";
     const ftAct = s.progress.freethrows; const ftPct = ftAct&&ftAct.att? Math.round(ftAct.made/ftAct.att*100):null;
     html+=`<div class="hist-item">
-      <div class="hist-ring">${ringSVG(pct)}<div class="pc" style="color:${pct===100?'var(--success)':'var(--accent2)'}">${pct}%</div></div>
       <div class="hist-meta">
         <div class="d">${fmtDate(s.startedAt)}</div>
         <div class="s">${s.completed}/${s.total} drills · ${dur} · ${s.makes||0} makes${ftPct!==null?` · ${ftPct}% FT`:""}</div>
