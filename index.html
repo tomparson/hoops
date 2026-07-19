@@ -479,18 +479,18 @@ function weekKey(d){ const x=new Date(d); x.setHours(0,0,0,0); const day=(x.getD
 /* streak = consecutive weeks (ending this week or last) with >=1 session */
 function computeStreak(sessions){
   if(!sessions.length) return 0;
-  const weeks = new Set(sessions.map(s=>weekKey(new Date(s.startedAt))));
+  const weeks = new Set(sessions.map(s=>weekKey(new Date(s.endedAt||s.startedAt))));
   let streak=0; let d=new Date();
   // allow the streak to count from this week or last week (one week of grace)
   if(!weeks.has(weekKey(d))){ d.setDate(d.getDate()-7); if(!weeks.has(weekKey(d))) return 0; }
   while(weeks.has(weekKey(d))){ streak++; d.setDate(d.getDate()-7); }
   return streak;
 }
-function weekHasSession(sessions){ return sessions.some(s=>weekKey(new Date(s.startedAt))===weekKey(new Date())); }
+function weekHasSession(sessions){ return sessions.some(s=>weekKey(new Date(s.endedAt||s.startedAt))===weekKey(new Date())); }
 function sessionsThisWeek(sessions){
   const now=new Date(); const day=(now.getDay()+6)%7; // monday=0
   const monday=new Date(now); monday.setHours(0,0,0,0); monday.setDate(now.getDate()-day);
-  return sessions.filter(s=> new Date(s.startedAt) >= monday).length;
+  return sessions.filter(s=> new Date(s.endedAt||s.startedAt) >= monday).length;
 }
 
 /* =====================================================================
@@ -577,7 +577,7 @@ function isoWeek(d){
   return 1+Math.round((x-firstThu)/(7*864e5));
 }
 function weekStreakHTML(sessions){
-  const trained=new Set(sessions.map(s=>weekKey(new Date(s.startedAt))));
+  const trained=new Set(sessions.map(s=>weekKey(new Date(s.endedAt||s.startedAt))));
   const now=new Date(); const day=(now.getDay()+6)%7;
   const thisMon=new Date(now); thisMon.setHours(0,0,0,0); thisMon.setDate(now.getDate()-day);
   const nowKey=weekKey(now);
