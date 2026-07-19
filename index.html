@@ -604,7 +604,7 @@ function timeSeries(sessions, key){
     let secs=null;
     if(key==="spots"){ const sp=pr.spots; if(sp&&sp.spots&&sp.spots.length&&sp.spots.every(v=>v!=null)) secs=sp.spots.reduce((a,b)=>a+b,0); }
     else { const d=pr[key]; if(d&&d.seconds!=null) secs=d.seconds; }
-    if(secs!=null) out.push({ ts:s.startedAt, secs });
+    if(secs!=null) out.push({ ts:s.endedAt||s.startedAt, secs });
   }
   return out;
 }
@@ -658,7 +658,7 @@ function spotsLineChart(sessions){
   // store for hover handler
   _slcData.xs = xs;
   _slcData.spotData = ss.map(s => s.progress.spots.spots);
-  _slcData.timestamps = ss.map(s => s.startedAt);
+  _slcData.timestamps = ss.map(s => s.endedAt||s.startedAt);
   _slcData.VW = VW; _slcData.ML = ML; _slcData.PW = PW;
 
   // gridlines (4 evenly spaced)
@@ -693,7 +693,7 @@ function spotsLineChart(sessions){
   }
 
   // x-axis date labels
-  const dateHTML=ss.map((s,i)=>`<text x="${xs[i].toFixed(1)}" y="${VH-3}" text-anchor="middle" fill="var(--muted)" font-size="8.5" font-family="system-ui,-apple-system,sans-serif">${new Date(s.startedAt).toLocaleDateString(undefined,{day:"numeric",month:"numeric"})}</text>`).join("");
+  const dateHTML=ss.map((s,i)=>`<text x="${xs[i].toFixed(1)}" y="${VH-3}" text-anchor="middle" fill="var(--muted)" font-size="8.5" font-family="system-ui,-apple-system,sans-serif">${new Date(s.endedAt||s.startedAt).toLocaleDateString(undefined,{day:"numeric",month:"numeric"})}</text>`).join("");
 
   // legend
   const legendHTML=SPOT_LABELS.map((l,i)=>`<div class="sl-leg-item"><svg width="16" height="10" style="flex:none"><line x1="0" y1="5" x2="16" y2="5" stroke="var(--sl${i+1})" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="5" r="3.5" fill="var(--sl${i+1})" stroke="var(--surface)" stroke-width="1.5"/></svg><span>${l}</span></div>`).join("");
