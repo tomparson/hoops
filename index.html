@@ -1198,7 +1198,7 @@ function renderHistory(){
     const ftAct = s.progress.freethrows; const ftPct = ftAct&&ftAct.att? Math.round(ftAct.made/ftAct.att*100):null;
     html+=`<div class="hist-item">
       <div class="hist-meta">
-        <div class="d">${fmtDate(s.startedAt)}</div>
+        <div class="d">${fmtDate(s.endedAt||s.startedAt)}</div>
         <div class="s">${s.completed}/${s.total} drills · ${dur} · ${s.makes||0} makes${ftPct!==null?` · ${ftPct}% FT`:""}</div>
         ${sessionTimesLine(s.progress)?`<div class="s times">${sessionTimesLine(s.progress)}</div>`:""}
       </div>
@@ -1221,7 +1221,7 @@ function renderHistory(){
 }
 function confirmDeleteSession(startedAt){
   const s=loadSessions().find(x=>x.startedAt===startedAt);
-  const when = s? fmtFullDate(s.startedAt) : "this session";
+  const when = s? fmtFullDate(s.endedAt||s.startedAt) : "this session";
   const detail = s? `${s.completed}/${s.total} drills · ${s.makes||0} makes` : "";
   showModal({
     title:"Delete session?",
